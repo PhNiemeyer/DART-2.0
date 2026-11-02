@@ -1,0 +1,2 @@
+/** Synthetischer Altexport (keine Echtdaten) – bildet Fallstricke aus dem Lastenheft nach. */
+export const SAMPLE_CSV = "P_ID;ZENTRUM;VISITCODE;BASELINE_DATE;SEITE;OPS1;OPS1_ART;CA_VAS;RAUCHER_CB;VOROP_A;FREITEXT_ALT;ALT_SCORE_ORIG;FU_ERNEUTOP_YN\n5001;101;1;15.03.2024;1;5-812;G;4,5;1;;Synthetischer Freitext;61;0\n5001;101;2;15.03.2024;1;;;3;0;;;;0\n5001;101;8;15.03.2024;1;;;2;;;;;9\n5002;999;1;02.05.2024;2;5-812;T;6;0;1;;55;\n5003;102;1;24.04.3023;2;5-812;;5;;;=SUMME(A1);;1\n5004;101;7;10.01.2025;1;;;;;;;;\n5005;102;3;20.08.2023;2;5-781;;7;1;;;48;0\n";

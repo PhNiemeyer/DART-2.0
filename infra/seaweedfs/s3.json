@@ -1,0 +1,9 @@
+{
+  "identities": [
+    {
+      "name": "dart-vault-demo",
+      "credentials": [{ "accessKey": "demo-s3-access", "secretKey": "demo-s3-secret-000000" }],
+      "actions": ["Read", "Write", "List", "Tagging", "Admin"]
+    }
+  ]
+}

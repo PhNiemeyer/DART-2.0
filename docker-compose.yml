@@ -1,0 +1,200 @@
+# DART 2.0 – lokaler Prototyp. Start: docker compose up --build   →  http://localhost:3000
+# AUSSCHLIESSLICH synthetische Daten und Demo-Geheimnisse. Kein Produktivbetrieb.
+name: dart2
+
+x-app-env: &app-env
+  NODE_ENV: ${DART_ENV:-development}
+  VAULT_URL: http://vault:4100
+  VAULT_TOKEN_API: ${VAULT_TOKEN_API:-demo-vault-token-api-0000000000}
+  VAULT_TOKEN_WORKER: ${VAULT_TOKEN_WORKER:-demo-vault-token-worker-00000000}
+  PUBLIC_WEB_URL: ${PUBLIC_WEB_URL:-http://localhost:3000}
+
+services:
+  db:
+    image: ${IMAGE_MIRROR:-docker.io}/library/postgres:18-alpine
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-demo-superuser}
+      DART_OWNER_PASSWORD: ${DART_OWNER_PASSWORD:-demo-owner}
+      DART_APP_PASSWORD: ${DART_APP_PASSWORD:-demo-app}
+      DART_WORKER_PASSWORD: ${DART_WORKER_PASSWORD:-demo-worker}
+      DART_MIGRATION_PASSWORD: ${DART_MIGRATION_PASSWORD:-demo-migration}
+    volumes:
+      - db-data:/var/lib/postgresql
+      - ./infra/postgres/core-init.sh:/docker-entrypoint-initdb.d/10-init.sh:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d dart"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks: [core]
+
+  vault-db:
+    image: ${IMAGE_MIRROR:-docker.io}/library/postgres:18-alpine
+    environment:
+      POSTGRES_PASSWORD: ${VAULT_POSTGRES_PASSWORD:-demo-vault-superuser}
+      VAULT_OWNER_PASSWORD: ${VAULT_OWNER_PASSWORD:-demo-vault-owner}
+      VAULT_APP_PASSWORD: ${VAULT_APP_PASSWORD:-demo-vault-app}
+    volumes:
+      - vault-db-data:/var/lib/postgresql
+      - ./infra/postgres/vault-init.sh:/docker-entrypoint-initdb.d/10-init.sh:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d dart_vault"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks: [vault]
+
+  s3:
+    image: ${IMAGE_MIRROR:-docker.io}/chrislusf/seaweedfs:3.97
+    command: ["server", "-dir=/data", "-s3", "-s3.port=8333", "-s3.config=/etc/seaweedfs/s3.json", "-master.volumeSizeLimitMB=64", "-volume.max=8"]
+    volumes:
+      - s3-data:/data
+      - ./infra/seaweedfs/s3.json:/etc/seaweedfs/s3.json:ro
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://localhost:9333/cluster/status || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    networks: [vault]
+
+  mailpit:
+    image: ${IMAGE_MIRROR:-docker.io}/axllent/mailpit:v1.27
+    ports: ["8025:8025"]
+    healthcheck:
+      test: ["CMD", "/mailpit", "readyz"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks: [core]
+
+  keycloak:
+    image: ${IMAGE_MIRROR:-docker.io}/keycloak/keycloak:26.4
+    command: ["start-dev", "--import-realm", "--http-port=8080", "--health-enabled=true"]
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-demo-keycloak-admin}
+      KC_HOSTNAME: http://localhost:8080
+      KC_HOSTNAME_BACKCHANNEL_DYNAMIC: "true"
+    volumes:
+      - ./infra/keycloak/dart-realm.json:/opt/keycloak/data/import/dart-realm.json:ro
+    ports: ["8080:8080"]
+    healthcheck:
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/localhost/9000 && echo -e 'GET /health/ready HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3 && grep -q UP <&3"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+    networks: [core]
+    profiles: ["oidc"]
+
+  migrate:
+    build: { context: ., target: app, args: { IMAGE_MIRROR: "${IMAGE_MIRROR:-docker.io}" } }
+    image: dart2-app:local
+    command: ["sh", "-c", "node migrations/migrate.mjs core && node migrations/migrate.mjs vault && node apps/api/dist/seed.js"]
+    environment:
+      NODE_ENV: ${DART_ENV:-development}
+      CORE_MIGRATION_URL: postgres://dart_owner:${DART_OWNER_PASSWORD:-demo-owner}@db:5432/dart
+      SEED_DATABASE_URL: postgres://dart_owner:${DART_OWNER_PASSWORD:-demo-owner}@db:5432/dart
+      VAULT_MIGRATION_URL: postgres://vault_owner:${VAULT_OWNER_PASSWORD:-demo-vault-owner}@vault-db:5432/dart_vault
+    depends_on:
+      db: { condition: service_healthy }
+      vault-db: { condition: service_healthy }
+    networks: [core, vault]
+    restart: "no"
+
+  vault:
+    image: dart2-app:local
+    command: ["node", "apps/vault/dist/main.js"]
+    environment:
+      NODE_ENV: ${DART_ENV:-development}
+      PORT: "4100"
+      VAULT_DATABASE_URL: postgres://vault_app:${VAULT_APP_PASSWORD:-demo-vault-app}@vault-db:5432/dart_vault
+      VAULT_DATA_KEY: ${VAULT_DATA_KEY:-ZGVtby1kZW1vLWRlbW8tZGVtby1kZW1vLWRlbW8tMzI=}
+      VAULT_INDEX_KEY: ${VAULT_INDEX_KEY:-ZGVtby1pbmRleC1rZXktbnVyLWxva2FsLWVudHdpY2s=}
+      VAULT_TOKEN_API: ${VAULT_TOKEN_API:-demo-vault-token-api-0000000000}
+      VAULT_TOKEN_WORKER: ${VAULT_TOKEN_WORKER:-demo-vault-token-worker-00000000}
+      VAULT_STORAGE: s3
+      S3_ENDPOINT: http://s3:8333
+      S3_BUCKET: dart-vault
+      S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID:-demo-s3-access}
+      S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY:-demo-s3-secret-000000}
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:4100/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+      s3: { condition: service_healthy }
+    networks: [vault, core]
+
+  api:
+    image: dart2-app:local
+    command: ["node", "apps/api/dist/main.js"]
+    environment:
+      <<: *app-env
+      PORT: "4000"
+      APP_DATABASE_URL: postgres://dart_app:${DART_APP_PASSWORD:-demo-app}@db:5432/dart
+      MIGRATION_DATABASE_URL: postgres://dart_migration:${DART_MIGRATION_PASSWORD:-demo-migration}@db:5432/dart
+      SESSION_SECRET: ${SESSION_SECRET:-demo-session-secret-nur-fuer-lokale-entwicklung-0000}
+      AUTH_MODE: ${AUTH_MODE:-dev}
+      OIDC_ISSUER: http://localhost:8080/realms/dart
+      OIDC_INTERNAL_ISSUER: http://keycloak:8080/realms/dart
+      OIDC_CLIENT_ID: dart-web
+      OIDC_CLIENT_SECRET: ${OIDC_CLIENT_SECRET:-demo-oidc-client-secret-000000}
+      OIDC_REDIRECT_URI: http://localhost:3000/api/v1/auth/oidc/callback
+      OIDC_POST_LOGIN_REDIRECT: http://localhost:3000/uebersicht
+    ports: ["4000:4000"]
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:4000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+      vault: { condition: service_healthy }
+    networks: [core]
+
+  worker:
+    image: dart2-app:local
+    command: ["node", "apps/worker/dist/main.js"]
+    environment:
+      <<: *app-env
+      PORT: "4200"
+      WORKER_DATABASE_URL: postgres://dart_worker:${DART_WORKER_PASSWORD:-demo-worker}@db:5432/dart
+      SMTP_HOST: mailpit
+      SMTP_PORT: "1025"
+      MAILPIT_API: http://mailpit:8025
+      WORKER_POLL_MS: "5000"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:4200/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+    depends_on:
+      api: { condition: service_healthy }
+      mailpit: { condition: service_healthy }
+    networks: [core]
+
+  web:
+    build: { context: ., target: web, args: { IMAGE_MIRROR: "${IMAGE_MIRROR:-docker.io}" } }
+    image: dart2-web:local
+    environment:
+      API_INTERNAL_URL: http://api:4000
+    ports: ["3000:3000"]
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3000/anmelden').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    depends_on:
+      api: { condition: service_healthy }
+    networks: [core]
+
+networks:
+  core: {}
+  vault: {}
+
+volumes:
+  db-data: {}
+  vault-db-data: {}
+  s3-data: {}

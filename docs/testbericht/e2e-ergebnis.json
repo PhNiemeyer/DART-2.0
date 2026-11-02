@@ -1,0 +1,562 @@
+{
+  "config": {
+    "argv": [
+      "/opt/node22/bin/node",
+      "/home/user/dart-2.0/tests/e2e/node_modules/@playwright/test/cli.js",
+      "test"
+    ],
+    "configFile": "/home/user/dart-2.0/tests/e2e/playwright.config.ts",
+    "rootDir": "/home/user/dart-2.0/tests/e2e",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/home/user/dart-2.0/tests/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "/home/user/dart-2.0/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 90000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list",
+        null
+      ],
+      [
+        "json",
+        {
+          "outputFile": "../../docs/testbericht/e2e-ergebnis.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.63.0",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "prototyp.spec.ts",
+      "file": "prototyp.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "DART 2.0 – vertikale Strecke",
+          "file": "prototyp.spec.ts",
+          "line": 41,
+          "column": 15,
+          "specs": [
+            {
+              "title": "Anmeldung und Dashboard (Desktop)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [
+                    {
+                      "type": "serial",
+                      "location": {
+                        "file": "/home/user/dart-2.0/tests/e2e/prototyp.spec.ts",
+                        "line": 41,
+                        "column": 15
+                      }
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 601,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-02T22:12:08.735Z",
+                      "annotations": [
+                        {
+                          "type": "serial",
+                          "location": {
+                            "file": "/home/user/dart-2.0/tests/e2e/prototyp.spec.ts",
+                            "line": 41,
+                            "column": 15
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "df147c69ada47a973bc0-5fc8b40732cd25fcef90",
+              "file": "prototyp.spec.ts",
+              "line": 42,
+              "column": 7
+            },
+            {
+              "title": "Dreistufige Anlage: Science, Knorpel + Osteotomie, DEKOR + KnorpelRegister",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [
+                    {
+                      "type": "serial",
+                      "location": {
+                        "file": "/home/user/dart-2.0/tests/e2e/prototyp.spec.ts",
+                        "line": 41,
+                        "column": 15
+                      }
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1578,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-02T22:12:09.460Z",
+                      "annotations": [
+                        {
+                          "type": "serial",
+                          "location": {
+                            "file": "/home/user/dart-2.0/tests/e2e/prototyp.spec.ts",
+                            "line": 41,
+                            "column": 15
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "df147c69ada47a973bc0-a90f45f7609d3ab208bb",
+              "file": "prototyp.spec.ts",
+              "line": 52,
+              "column": 7
+            },
+            {
+              "title": "Mobiles Portal (360 px): bewusstes Einlösen, Zugangscode, aktive Zustimmung mit Tastatur-Alternative",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [
+                    {
+                      "type": "serial",
+                      "location": {
+                        "file": "/home/user/dart-2.0/tests/e2e/prototyp.spec.ts",
+                        "line": 41,
+                        "column": 15
+                      }
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2462,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-02T22:12:11.056Z",
+                      "annotations": [
+                        {
+                          "type": "serial",
+                          "location": {
+                            "file": "/home/user/dart-2.0/tests/e2e/prototyp.spec.ts",
+                            "line": 41,
+                            "column": 15
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "df147c69ada47a973bc0-77cdd162c496ad86c20d",
+              "file": "prototyp.spec.ts",
+              "line": 91,
+              "column": 7
+            },
+            {
+              "title": "Dynamischer Arztbogen: Modulchips, Autosave, Verzweigung, Konflikt, Abschluss",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [
+                    {
+                      "type": "serial",
+                      "location": {
+                        "file": "/home/user/dart-2.0/tests/e2e/prototyp.spec.ts",
+                        "line": 41,
+                        "column": 15
+                      }
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5646,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-02T22:12:13.527Z",
+                      "annotations": [
+                        {
+                          "type": "serial",
+                          "location": {
+                            "file": "/home/user/dart-2.0/tests/e2e/prototyp.spec.ts",
+                            "line": 41,
+                            "column": 15
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "df147c69ada47a973bc0-00a2f40b802c27e35262",
+              "file": "prototyp.spec.ts",
+              "line": 127,
+              "column": 7
+            },
+            {
+              "title": "Formulareditor mit Vorschau und Versionsfreigabe",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [
+                    {
+                      "type": "serial",
+                      "location": {
+                        "file": "/home/user/dart-2.0/tests/e2e/prototyp.spec.ts",
+                        "line": 41,
+                        "column": 15
+                      }
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 845,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-02T22:12:19.185Z",
+                      "annotations": [
+                        {
+                          "type": "serial",
+                          "location": {
+                            "file": "/home/user/dart-2.0/tests/e2e/prototyp.spec.ts",
+                            "line": 41,
+                            "column": 15
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "df147c69ada47a973bc0-8f6d6b16db1e15957fce",
+              "file": "prototyp.spec.ts",
+              "line": 170,
+              "column": 7
+            },
+            {
+              "title": "Papierweg: Upload in Prüfung und Prüfansicht",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [
+                    {
+                      "type": "serial",
+                      "location": {
+                        "file": "/home/user/dart-2.0/tests/e2e/prototyp.spec.ts",
+                        "line": 41,
+                        "column": 15
+                      }
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1716,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-02T22:12:20.042Z",
+                      "annotations": [
+                        {
+                          "type": "serial",
+                          "location": {
+                            "file": "/home/user/dart-2.0/tests/e2e/prototyp.spec.ts",
+                            "line": 41,
+                            "column": 15
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "df147c69ada47a973bc0-726210dd35fccbc0efe3",
+              "file": "prototyp.spec.ts",
+              "line": 179,
+              "column": 7
+            },
+            {
+              "title": "Keine Rechte (Technischer Betrieb) und Dashboard bei 360 px",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [
+                    {
+                      "type": "serial",
+                      "location": {
+                        "file": "/home/user/dart-2.0/tests/e2e/prototyp.spec.ts",
+                        "line": 41,
+                        "column": 15
+                      }
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 752,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-02T22:12:21.776Z",
+                      "annotations": [
+                        {
+                          "type": "serial",
+                          "location": {
+                            "file": "/home/user/dart-2.0/tests/e2e/prototyp.spec.ts",
+                            "line": 41,
+                            "column": 15
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "df147c69ada47a973bc0-ad65f92965f145850fd3",
+              "file": "prototyp.spec.ts",
+              "line": 204,
+              "column": 7
+            },
+            {
+              "title": "Tastaturbedienung: sichtbarer Fokus und Sprunglink",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [
+                    {
+                      "type": "serial",
+                      "location": {
+                        "file": "/home/user/dart-2.0/tests/e2e/prototyp.spec.ts",
+                        "line": 41,
+                        "column": 15
+                      }
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 263,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-02T22:12:22.550Z",
+                      "annotations": [
+                        {
+                          "type": "serial",
+                          "location": {
+                            "file": "/home/user/dart-2.0/tests/e2e/prototyp.spec.ts",
+                            "line": 41,
+                            "column": 15
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "df147c69ada47a973bc0-e2d5e2549a7947219401",
+              "file": "prototyp.spec.ts",
+              "line": 214,
+              "column": 7
+            },
+            {
+              "title": "Linkscanner (GET) verbraucht keinen Einladungstoken",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [
+                    {
+                      "type": "serial",
+                      "location": {
+                        "file": "/home/user/dart-2.0/tests/e2e/prototyp.spec.ts",
+                        "line": 41,
+                        "column": 15
+                      }
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 46,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-02T22:12:22.830Z",
+                      "annotations": [
+                        {
+                          "type": "serial",
+                          "location": {
+                            "file": "/home/user/dart-2.0/tests/e2e/prototyp.spec.ts",
+                            "line": 41,
+                            "column": 15
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "df147c69ada47a973bc0-19dc5ec30075ed2fe9b2",
+              "file": "prototyp.spec.ts",
+              "line": 223,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-11-02T22:12:08.044Z",
+    "duration": 14927.615,
+    "expected": 9,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

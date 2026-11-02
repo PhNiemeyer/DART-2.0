@@ -1,0 +1,217 @@
+{
+  "realm": "dart",
+  "enabled": true,
+  "displayName": "DART 2.0 (lokale Testkonfiguration)",
+  "internationalizationEnabled": true,
+  "supportedLocales": [
+    "de"
+  ],
+  "defaultLocale": "de",
+  "registrationAllowed": false,
+  "resetPasswordAllowed": false,
+  "bruteForceProtected": true,
+  "otpPolicyType": "totp",
+  "otpPolicyAlgorithm": "HmacSHA256",
+  "otpPolicyDigits": 6,
+  "otpPolicyPeriod": 30,
+  "clients": [
+    {
+      "clientId": "dart-web",
+      "name": "DART 2.0 Web (lokal)",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "secret": "demo-oidc-client-secret-000000",
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "redirectUris": [
+        "http://localhost:3000/api/v1/auth/oidc/callback"
+      ],
+      "webOrigins": [
+        "http://localhost:3000"
+      ],
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "http://localhost:3000/*"
+      }
+    }
+  ],
+  "users": [
+    {
+      "username": "admin",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "admin@personal.dart-prototyp.invalid",
+      "firstName": "Demo",
+      "lastName": "admin",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo-Passwort-1",
+          "temporary": false
+        }
+      ],
+      "requiredActions": []
+    },
+    {
+      "username": "dr.nord",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "dr.nord@personal.dart-prototyp.invalid",
+      "firstName": "Demo",
+      "lastName": "dr.nord",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo-Passwort-1",
+          "temporary": false
+        }
+      ],
+      "requiredActions": []
+    },
+    {
+      "username": "dr.nord2",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "dr.nord2@personal.dart-prototyp.invalid",
+      "firstName": "Demo",
+      "lastName": "dr.nord2",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo-Passwort-1",
+          "temporary": false
+        }
+      ],
+      "requiredActions": []
+    },
+    {
+      "username": "doku.nord",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "doku.nord@personal.dart-prototyp.invalid",
+      "firstName": "Demo",
+      "lastName": "doku.nord",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo-Passwort-1",
+          "temporary": false
+        }
+      ],
+      "requiredActions": []
+    },
+    {
+      "username": "leitung.nord",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "leitung.nord@personal.dart-prototyp.invalid",
+      "firstName": "Demo",
+      "lastName": "leitung.nord",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo-Passwort-1",
+          "temporary": false
+        }
+      ],
+      "requiredActions": []
+    },
+    {
+      "username": "dr.sued",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "dr.sued@personal.dart-prototyp.invalid",
+      "firstName": "Demo",
+      "lastName": "dr.sued",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo-Passwort-1",
+          "temporary": false
+        }
+      ],
+      "requiredActions": []
+    },
+    {
+      "username": "daten",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "daten@personal.dart-prototyp.invalid",
+      "firstName": "Demo",
+      "lastName": "daten",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo-Passwort-1",
+          "temporary": false
+        }
+      ],
+      "requiredActions": []
+    },
+    {
+      "username": "redaktion",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "redaktion@personal.dart-prototyp.invalid",
+      "firstName": "Demo",
+      "lastName": "redaktion",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo-Passwort-1",
+          "temporary": false
+        }
+      ],
+      "requiredActions": []
+    },
+    {
+      "username": "freigabe",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "freigabe@personal.dart-prototyp.invalid",
+      "firstName": "Demo",
+      "lastName": "freigabe",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo-Passwort-1",
+          "temporary": false
+        }
+      ],
+      "requiredActions": []
+    },
+    {
+      "username": "forschung",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "forschung@personal.dart-prototyp.invalid",
+      "firstName": "Demo",
+      "lastName": "forschung",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo-Passwort-1",
+          "temporary": false
+        }
+      ],
+      "requiredActions": []
+    },
+    {
+      "username": "technik",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "technik@personal.dart-prototyp.invalid",
+      "firstName": "Demo",
+      "lastName": "technik",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo-Passwort-1",
+          "temporary": false
+        }
+      ],
+      "requiredActions": []
+    }
+  ]
+}
