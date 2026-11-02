@@ -87,7 +87,7 @@ services:
     profiles: ["oidc"]
 
   migrate:
-    build: { context: ., target: app, args: { IMAGE_MIRROR: "${IMAGE_MIRROR:-docker.io}" } }
+    build: { context: ., target: app, args: { IMAGE_MIRROR: "${IMAGE_MIRROR:-docker.io}" }, secrets: [extra_ca] }
     image: dart2-app:local
     command: ["sh", "-c", "node migrations/migrate.mjs core && node migrations/migrate.mjs vault && node apps/api/dist/seed.js"]
     environment:
@@ -176,7 +176,7 @@ services:
     networks: [core]
 
   web:
-    build: { context: ., target: web, args: { IMAGE_MIRROR: "${IMAGE_MIRROR:-docker.io}" } }
+    build: { context: ., target: web, args: { IMAGE_MIRROR: "${IMAGE_MIRROR:-docker.io}" }, secrets: [extra_ca] }
     image: dart2-web:local
     environment:
       API_INTERNAL_URL: http://api:4000
@@ -193,6 +193,11 @@ services:
 networks:
   core: {}
   vault: {}
+
+secrets:
+  # Optionales CA-Zertifikat für den Build hinter TLS-Proxies (Standard: leer)
+  extra_ca:
+    file: ${EXTRA_CA_CERT:-/dev/null}
 
 volumes:
   db-data: {}

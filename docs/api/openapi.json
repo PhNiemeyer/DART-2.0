@@ -1,0 +1,1543 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/api/health": {
+      "get": {
+        "operationId": "HealthController_health",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Betrieb"
+        ]
+      }
+    },
+    "/api/v1/auth/mode": {
+      "get": {
+        "operationId": "AuthController_mode",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Anmeldung"
+        ]
+      }
+    },
+    "/api/v1/auth/dev-users": {
+      "get": {
+        "operationId": "AuthController_devUsers",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Anmeldung"
+        ]
+      }
+    },
+    "/api/v1/auth/dev-login": {
+      "post": {
+        "operationId": "AuthController_devLogin",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Anmeldung"
+        ]
+      }
+    },
+    "/api/v1/auth/oidc/start": {
+      "get": {
+        "operationId": "AuthController_oidcStart",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Anmeldung"
+        ]
+      }
+    },
+    "/api/v1/auth/oidc/callback": {
+      "get": {
+        "operationId": "AuthController_oidcCallback",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Anmeldung"
+        ]
+      }
+    },
+    "/api/v1/auth/me": {
+      "get": {
+        "operationId": "AuthController_me",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Anmeldung"
+        ]
+      }
+    },
+    "/api/v1/auth/logout": {
+      "post": {
+        "operationId": "AuthController_logout",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Anmeldung"
+        ]
+      }
+    },
+    "/api/v1/meta/catalog": {
+      "get": {
+        "operationId": "MetaController_catalog",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Stammdaten"
+        ]
+      }
+    },
+    "/api/v1/meta/ops": {
+      "get": {
+        "operationId": "MetaController_ops",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Stammdaten"
+        ]
+      }
+    },
+    "/api/v1/meta/consent-documents": {
+      "get": {
+        "operationId": "MetaController_consentDocs",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Stammdaten"
+        ]
+      }
+    },
+    "/api/v1/meta/centers/{id}/staff": {
+      "get": {
+        "operationId": "MetaController_staff",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Stammdaten"
+        ]
+      }
+    },
+    "/api/v1/admin/centers": {
+      "get": {
+        "operationId": "AdminController_centers",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Administration"
+        ]
+      },
+      "post": {
+        "operationId": "AdminController_createCenter",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Administration"
+        ]
+      }
+    },
+    "/api/v1/admin/centers/{id}/science-approval": {
+      "post": {
+        "operationId": "AdminController_science",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Administration"
+        ]
+      }
+    },
+    "/api/v1/admin/users": {
+      "get": {
+        "operationId": "AdminController_users",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Administration"
+        ]
+      },
+      "post": {
+        "operationId": "AdminController_createUser",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Administration"
+        ]
+      }
+    },
+    "/api/v1/admin/users/{id}/roles": {
+      "post": {
+        "operationId": "AdminController_grant",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Administration"
+        ]
+      }
+    },
+    "/api/v1/admin/users/{id}/roles/{roleId}/revoke": {
+      "post": {
+        "operationId": "AdminController_revoke",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "roleId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Administration"
+        ]
+      }
+    },
+    "/api/v1/admin/users/{id}/lock": {
+      "post": {
+        "operationId": "AdminController_lock",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Administration"
+        ]
+      }
+    },
+    "/api/v1/admin/audit": {
+      "get": {
+        "operationId": "AdminController_auditLog",
+        "parameters": [
+          {
+            "name": "objectId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Administration"
+        ]
+      }
+    },
+    "/api/v1/cases": {
+      "get": {
+        "operationId": "CasesController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Fälle"
+        ]
+      },
+      "post": {
+        "operationId": "CasesController_create",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Fälle"
+        ]
+      }
+    },
+    "/api/v1/dashboard/tasks": {
+      "get": {
+        "operationId": "CasesController_tasks",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Fälle"
+        ]
+      }
+    },
+    "/api/v1/cases/{id}": {
+      "get": {
+        "operationId": "CasesController_detail",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Fälle"
+        ]
+      }
+    },
+    "/api/v1/cases/{id}/identity": {
+      "get": {
+        "operationId": "CasesController_identity",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Fälle"
+        ]
+      }
+    },
+    "/api/v1/patients/search-by-name": {
+      "post": {
+        "operationId": "CasesController_searchByName",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Fälle"
+        ]
+      }
+    },
+    "/api/v1/cases/{id}/dates": {
+      "post": {
+        "operationId": "CasesController_correctDates",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Fälle"
+        ]
+      }
+    },
+    "/api/v1/cases/{id}/mode": {
+      "post": {
+        "operationId": "CasesController_changeMode",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Fälle"
+        ]
+      }
+    },
+    "/api/v1/consents": {
+      "post": {
+        "operationId": "ConsentController_prepare",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Einwilligung"
+        ]
+      }
+    },
+    "/api/v1/consents/review-queue": {
+      "get": {
+        "operationId": "ConsentController_queue",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Einwilligung"
+        ]
+      }
+    },
+    "/api/v1/consents/{id}/onsite-link": {
+      "post": {
+        "operationId": "ConsentController_onsite",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Einwilligung"
+        ]
+      }
+    },
+    "/api/v1/consents/{id}/evidence": {
+      "post": {
+        "operationId": "ConsentController_evidence",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Einwilligung"
+        ]
+      }
+    },
+    "/api/v1/consents/{id}/evidence/file": {
+      "get": {
+        "operationId": "ConsentController_file",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Einwilligung"
+        ]
+      }
+    },
+    "/api/v1/consents/{id}/review": {
+      "post": {
+        "operationId": "ConsentController_review",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Einwilligung"
+        ]
+      }
+    },
+    "/api/v1/consents/{id}/withdraw": {
+      "post": {
+        "operationId": "ConsentController_withdraw",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Einwilligung"
+        ]
+      }
+    },
+    "/api/v1/consents/patient/{patientId}": {
+      "get": {
+        "operationId": "ConsentController_list",
+        "parameters": [
+          {
+            "name": "patientId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Einwilligung"
+        ]
+      }
+    },
+    "/api/v1/responses/{id}": {
+      "get": {
+        "operationId": "ResponsesController_get",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Erhebungen"
+        ]
+      }
+    },
+    "/api/v1/responses/{id}/history": {
+      "get": {
+        "operationId": "ResponsesController_history",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Erhebungen"
+        ]
+      }
+    },
+    "/api/v1/responses/{id}/draft": {
+      "patch": {
+        "operationId": "ResponsesController_draft",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "if-match",
+            "required": true,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Erhebungen"
+        ]
+      }
+    },
+    "/api/v1/responses/{id}/submit": {
+      "post": {
+        "operationId": "ResponsesController_submit",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "if-match",
+            "required": true,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Erhebungen"
+        ]
+      }
+    },
+    "/api/v1/responses/{id}/reopen": {
+      "post": {
+        "operationId": "ResponsesController_reopen",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Erhebungen"
+        ]
+      }
+    },
+    "/api/v1/questionnaires": {
+      "get": {
+        "operationId": "FormsController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Formulare"
+        ]
+      },
+      "post": {
+        "operationId": "FormsController_create",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Formulare"
+        ]
+      }
+    },
+    "/api/v1/form-versions/{id}": {
+      "get": {
+        "operationId": "FormsController_get",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Formulare"
+        ]
+      },
+      "put": {
+        "operationId": "FormsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Formulare"
+        ]
+      }
+    },
+    "/api/v1/questionnaires/{id}/versions": {
+      "post": {
+        "operationId": "FormsController_newVersion",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Formulare"
+        ]
+      }
+    },
+    "/api/v1/form-versions/{id}/submit-review": {
+      "post": {
+        "operationId": "FormsController_submitReview",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Formulare"
+        ]
+      }
+    },
+    "/api/v1/form-versions/{id}/reject": {
+      "post": {
+        "operationId": "FormsController_reject",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Formulare"
+        ]
+      }
+    },
+    "/api/v1/form-versions/{id}/approve": {
+      "post": {
+        "operationId": "FormsController_approve",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Formulare"
+        ]
+      }
+    },
+    "/api/v1/form-versions/{id}/publish": {
+      "post": {
+        "operationId": "FormsController_publish",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Formulare"
+        ]
+      }
+    },
+    "/api/v1/form-versions/{id}/retire": {
+      "post": {
+        "operationId": "FormsController_retire",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Formulare"
+        ]
+      }
+    },
+    "/api/v1/form-versions/{id}/discard": {
+      "post": {
+        "operationId": "FormsController_discard",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Formulare"
+        ]
+      }
+    },
+    "/api/v1/form-versions/{id}/export": {
+      "get": {
+        "operationId": "FormsController_export",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Formulare"
+        ]
+      }
+    },
+    "/api/v1/questionnaires/import": {
+      "post": {
+        "operationId": "FormsController_import",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Formulare"
+        ]
+      }
+    },
+    "/api/v1/portal/redeem": {
+      "post": {
+        "operationId": "PortalController_redeem",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Patientenportal"
+        ]
+      }
+    },
+    "/api/v1/portal/verify": {
+      "post": {
+        "operationId": "PortalController_verify",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Patientenportal"
+        ]
+      }
+    },
+    "/api/v1/portal/me": {
+      "get": {
+        "operationId": "PortalController_me",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Patientenportal"
+        ]
+      }
+    },
+    "/api/v1/portal/consents/{id}/sign": {
+      "post": {
+        "operationId": "PortalController_sign",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Patientenportal"
+        ]
+      }
+    },
+    "/api/v1/portal/consents/{id}/copy": {
+      "get": {
+        "operationId": "PortalController_copy",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Patientenportal"
+        ]
+      }
+    },
+    "/api/v1/portal/consents/{id}/withdraw": {
+      "post": {
+        "operationId": "PortalController_withdraw",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Patientenportal"
+        ]
+      }
+    },
+    "/api/v1/portal/responses/{id}": {
+      "get": {
+        "operationId": "PortalController_getResponse",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Patientenportal"
+        ]
+      }
+    },
+    "/api/v1/portal/responses/{id}/draft": {
+      "patch": {
+        "operationId": "PortalController_draft",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "if-match",
+            "required": true,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Patientenportal"
+        ]
+      }
+    },
+    "/api/v1/portal/responses/{id}/submit": {
+      "post": {
+        "operationId": "PortalController_submit",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "if-match",
+            "required": true,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Patientenportal"
+        ]
+      }
+    },
+    "/api/v1/portal/resend": {
+      "post": {
+        "operationId": "PortalController_resend",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Patientenportal"
+        ]
+      }
+    },
+    "/api/v1/portal/logout": {
+      "post": {
+        "operationId": "PortalController_logout",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Patientenportal"
+        ]
+      }
+    },
+    "/api/v1/reports/center": {
+      "get": {
+        "operationId": "ReportsController_center",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Auswertung"
+        ]
+      }
+    },
+    "/api/v1/exports": {
+      "post": {
+        "operationId": "ExportsController_request",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Export"
+        ]
+      },
+      "get": {
+        "operationId": "ExportsController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Export"
+        ]
+      }
+    },
+    "/api/v1/exports/{id}/decide": {
+      "post": {
+        "operationId": "ExportsController_decide",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Export"
+        ]
+      }
+    },
+    "/api/v1/exports/{id}/files/{name}": {
+      "get": {
+        "operationId": "ExportsController_file",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "name",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Export"
+        ]
+      }
+    },
+    "/api/v1/migration/manifest": {
+      "get": {
+        "operationId": "MigrationController_manifest",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Migration"
+        ]
+      }
+    },
+    "/api/v1/migration/mapping": {
+      "get": {
+        "operationId": "MigrationController_mapping",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Migration"
+        ]
+      }
+    },
+    "/api/v1/migration-batches/dry-run": {
+      "post": {
+        "operationId": "MigrationController_dryRun",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Migration"
+        ]
+      }
+    },
+    "/api/v1/migration-batches/import": {
+      "post": {
+        "operationId": "MigrationController_import",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Migration"
+        ]
+      }
+    },
+    "/api/v1/migration-batches/{id}/rollback": {
+      "post": {
+        "operationId": "MigrationController_rollback",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Migration"
+        ]
+      }
+    },
+    "/api/v1/migration-batches": {
+      "get": {
+        "operationId": "MigrationController_batches",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Migration"
+        ]
+      }
+    },
+    "/api/v1/migration-batches/{id}/report": {
+      "get": {
+        "operationId": "MigrationController_report",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Migration"
+        ]
+      }
+    },
+    "/api/v1/migration-batches/{id}/issues": {
+      "get": {
+        "operationId": "MigrationController_issues",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Migration"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "DART 2.0 API",
+    "description": "Versionierte REST-API (v1) des DART-2.0-Prototyps. Fehlerantworten: { code, message (deutsch), request_id }. Nur synthetische Daten.",
+    "version": "1.0.0-prototyp",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "securitySchemes": {
+      "cookie": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "dart_session"
+      }
+    },
+    "schemas": {}
+  }
+}

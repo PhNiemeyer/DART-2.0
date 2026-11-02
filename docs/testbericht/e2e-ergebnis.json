@@ -65,6 +65,68 @@
   },
   "suites": [
     {
+      "title": "oidc.spec.ts",
+      "file": "oidc.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "Anmeldung über Keycloak (OIDC, Authorization Code + PKCE)",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "Keycloak-Profil nicht aktiv",
+                  "location": {
+                    "file": "/home/user/dart-2.0/tests/e2e/oidc.spec.ts",
+                    "line": 4,
+                    "column": 6
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": -1,
+                  "parallelIndex": -1,
+                  "status": "skipped",
+                  "duration": 0,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-02T22:26:32.330Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "Keycloak-Profil nicht aktiv",
+                      "location": {
+                        "file": "/home/user/dart-2.0/tests/e2e/oidc.spec.ts",
+                        "line": 4,
+                        "column": 6
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "94391b1be10cf7be5001-fb0b84822944d280e067",
+          "file": "oidc.spec.ts",
+          "line": 6,
+          "column": 5
+        }
+      ]
+    },
+    {
       "title": "prototyp.spec.ts",
       "file": "prototyp.spec.ts",
       "column": 0,
@@ -102,12 +164,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 601,
+                      "duration": 705,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-11-02T22:12:08.735Z",
+                      "startTime": "2026-11-02T22:26:32.837Z",
                       "annotations": [
                         {
                           "type": "serial",
@@ -154,12 +216,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 1578,
+                      "duration": 1749,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-11-02T22:12:09.460Z",
+                      "startTime": "2026-11-02T22:26:33.703Z",
                       "annotations": [
                         {
                           "type": "serial",
@@ -206,12 +268,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 2462,
+                      "duration": 2646,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-11-02T22:12:11.056Z",
+                      "startTime": "2026-11-02T22:26:35.474Z",
                       "annotations": [
                         {
                           "type": "serial",
@@ -258,12 +320,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 5646,
+                      "duration": 5822,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-11-02T22:12:13.527Z",
+                      "startTime": "2026-11-02T22:26:38.134Z",
                       "annotations": [
                         {
                           "type": "serial",
@@ -310,12 +372,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 845,
+                      "duration": 835,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-11-02T22:12:19.185Z",
+                      "startTime": "2026-11-02T22:26:43.970Z",
                       "annotations": [
                         {
                           "type": "serial",
@@ -362,12 +424,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 1716,
+                      "duration": 1706,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-11-02T22:12:20.042Z",
+                      "startTime": "2026-11-02T22:26:44.822Z",
                       "annotations": [
                         {
                           "type": "serial",
@@ -414,12 +476,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 752,
+                      "duration": 731,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-11-02T22:12:21.776Z",
+                      "startTime": "2026-11-02T22:26:46.542Z",
                       "annotations": [
                         {
                           "type": "serial",
@@ -466,12 +528,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 263,
+                      "duration": 344,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-11-02T22:12:22.550Z",
+                      "startTime": "2026-11-02T22:26:47.287Z",
                       "annotations": [
                         {
                           "type": "serial",
@@ -518,12 +580,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 46,
+                      "duration": 44,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-11-02T22:12:22.830Z",
+                      "startTime": "2026-11-02T22:26:47.646Z",
                       "annotations": [
                         {
                           "type": "serial",
@@ -542,7 +604,7 @@
               ],
               "id": "df147c69ada47a973bc0-19dc5ec30075ed2fe9b2",
               "file": "prototyp.spec.ts",
-              "line": 223,
+              "line": 225,
               "column": 7
             }
           ]
@@ -552,10 +614,10 @@
   ],
   "errors": [],
   "stats": {
-    "startTime": "2026-11-02T22:12:08.044Z",
-    "duration": 14927.615,
+    "startTime": "2026-11-02T22:26:32.293Z",
+    "duration": 15501.538,
     "expected": 9,
-    "skipped": 0,
+    "skipped": 1,
     "unexpected": 0,
     "flaky": 0
   }

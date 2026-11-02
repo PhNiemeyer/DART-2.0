@@ -213,9 +213,11 @@ test.describe.serial('DART 2.0 – vertikale Strecke', () => {
 
   test('Tastaturbedienung: sichtbarer Fokus und Sprunglink', async ({ page }) => {
     await page.goto('/anmelden');
+    await expect(page.locator('button[data-user]').first()).toBeVisible();
     await page.keyboard.press('Tab');
     await expect(page.getByText('Zum Inhalt springen')).toBeFocused();
     await page.keyboard.press('Tab');
+    await expect(page.locator('button[data-user]').first()).toBeFocused();
     const shadow = await page.evaluate(() => getComputedStyle(document.activeElement!).boxShadow);
     expect(shadow).not.toBe('none');
   });

@@ -11,7 +11,13 @@ import { createStorage } from './storage';
  * Identity Vault: eigenständige Sicherheitsgrenze. Nur Diensttoken-authentisierte Aufrufer
  * (API, Worker). Jeder Zugriff wird im Zugriffsprotokoll festgehalten. Keine Inhalte in Betriebslogs.
  */
-const cfg = loadConfig();
+let cfg: ReturnType<typeof loadConfig>;
+try {
+  cfg = loadConfig();
+} catch (e) {
+  console.error(JSON.stringify({ level: 'fatal', dienst: 'vault', meldung: (e as Error).message }));
+  process.exit(1);
+}
 const pool = new Pool({ connectionString: cfg.databaseUrl, max: 10 });
 const storage = createStorage(cfg);
 

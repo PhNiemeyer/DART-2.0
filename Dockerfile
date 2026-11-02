@@ -3,13 +3,18 @@
 ARG IMAGE_MIRROR=docker.io
 FROM ${IMAGE_MIRROR}/library/node:22-alpine AS build
 WORKDIR /repo
-RUN npm install -g pnpm@10.28.0
+# Optional: zusätzliches CA-Zertifikat (z. B. Firmen-Proxy) als Build-Secret „extra_ca“
+RUN --mount=type=secret,id=extra_ca,required=false \
+    if [ -s /run/secrets/extra_ca ]; then export NODE_EXTRA_CA_CERTS=/run/secrets/extra_ca; fi; \
+    npm install -g pnpm@10.28.0
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json tsconfig.base.json ./
 COPY packages packages
 COPY apps apps
 COPY migrations migrations
 COPY tests/e2e/package.json tests/e2e/package.json
-RUN pnpm install --frozen-lockfile
+RUN --mount=type=secret,id=extra_ca,required=false \
+    if [ -s /run/secrets/extra_ca ]; then export NODE_EXTRA_CA_CERTS=/run/secrets/extra_ca; fi; \
+    pnpm install --frozen-lockfile
 RUN pnpm -r --filter "./packages/**" run build \
  && pnpm --filter @dart/vault --filter @dart/api --filter @dart/worker run build \
  && pnpm --filter @dart/web run build
