@@ -15,8 +15,18 @@ async function login(page: Page, user: string) {
 }
 
 async function noHorizontalScroll(page: Page) {
-  const r = await page.evaluate(() => ({ sw: document.documentElement.scrollWidth, cw: document.documentElement.clientWidth }));
+  const r = await page.evaluate(() => {
+    const vw = document.documentElement.clientWidth;
+    // Elemente, die über den rechten Rand hinausragen (ausgenommen bewusst scrollbare Container und deren Inhalt)
+    const off = [...document.querySelectorAll('main *, header *')].filter((el) => {
+      if (el.closest('.table-wrap, .sidenav ul, .consent-text, pre')) return false;
+      const b = el.getBoundingClientRect();
+      return b.width > 0 && b.right > vw + 1;
+    }).map((el) => `${el.tagName.toLowerCase()}.${(el as HTMLElement).className}`.slice(0, 60));
+    return { sw: document.documentElement.scrollWidth, cw: vw, off: off.slice(0, 5) };
+  });
   expect(r.sw, 'keine horizontale Seitenverschiebung').toBeLessThanOrEqual(r.cw + 1);
+  expect(r.off, 'keine abgeschnittenen Elemente').toEqual([]);
 }
 
 async function unlabeledInputs(page: Page): Promise<string[]> {
@@ -207,8 +217,13 @@ test.describe.serial('DART 2.0 – vertikale Strecke', () => {
     await page.screenshot({ path: SHOT('16-keine-rechte') });
     await page.setViewportSize({ width: 360, height: 800 });
     await login(page, 'dr.nord');
+    await expect(page.getByText('Arztbögen offen')).toBeVisible();
     await noHorizontalScroll(page);
     await page.screenshot({ path: SHOT('17-dashboard-360'), fullPage: false });
+    await page.goto(caseUrl);
+    await expect(page.getByRole('heading', { name: /Fall D-/ })).toBeVisible();
+    await noHorizontalScroll(page);
+    await page.screenshot({ path: SHOT('18-fall-360'), fullPage: false });
   });
 
   test('Tastaturbedienung: sichtbarer Fokus und Sprunglink', async ({ page }) => {

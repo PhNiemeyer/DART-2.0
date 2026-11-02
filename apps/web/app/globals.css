@@ -53,7 +53,8 @@ a:hover { text-decoration-thickness: 2px; }
 .topbar .who { font-size: .9rem; display: flex; gap: var(--space-2); align-items: center; flex-wrap: wrap; }
 .topbar button { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,.6); min-height: 36px; }
 .demo-banner { background: var(--mint); color: var(--text); font-size: .875rem; padding: 6px var(--space-3); border-bottom: 1px solid var(--border); }
-.layout { display: grid; grid-template-columns: 220px 1fr; min-height: calc(100vh - 90px); }
+.layout { display: grid; grid-template-columns: 220px minmax(0, 1fr); min-height: calc(100vh - 90px); }
+.layout > * { min-width: 0; }
 .sidenav { background: var(--surface); border-right: 1px solid var(--border); padding: var(--space-2); }
 .sidenav ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
 .sidenav a { display: block; padding: 10px 12px; border-radius: var(--radius); color: var(--text); text-decoration: none; }
@@ -62,7 +63,7 @@ a:hover { text-decoration-thickness: 2px; }
 main { padding: var(--space-3); min-width: 0; }
 .container { max-width: 1200px; margin: 0 auto; }
 @media (max-width: 860px) {
-  .layout { grid-template-columns: 1fr; }
+  .layout { grid-template-columns: minmax(0, 1fr); }
   .sidenav { border-right: 0; border-bottom: 1px solid var(--border); padding: var(--space-1); }
   .sidenav ul { display: flex; overflow-x: auto; gap: 4px; }
   .sidenav a { white-space: nowrap; }
@@ -138,7 +139,7 @@ table.data td { padding: 10px 12px; border-bottom: 1px solid var(--border); vert
 table.data tr:hover td { background: #f9fbfc; }
 .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius-lg); }
 @media (max-width: 720px) {
-  table.cards thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  table.cards thead { display: none; }
   table.cards, table.cards tbody, table.cards tr, table.cards td { display: block; width: 100%; }
   table.cards tr { border-bottom: 1px solid var(--border); padding: 8px 0; }
   table.cards td { border: 0; padding: 4px 12px; }
@@ -171,3 +172,8 @@ pre.code { background: #0f2233; color: #e6eef5; padding: 12px; border-radius: va
 @media (max-width: 560px) { .diff { grid-template-columns: 1fr; } }
 .editor-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--space-2); }
 @media (max-width: 1000px) { .editor-grid { grid-template-columns: 1fr; } }
+
+.kv { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 4px 16px; margin: 0; }
+.kv dd { margin: 0; overflow-wrap: anywhere; }
+@media (max-width: 480px) { .kv { grid-template-columns: minmax(0, 1fr); gap: 0; } .kv dt { font-weight: 600; margin-top: 6px; } }
+main { overflow-wrap: anywhere; }

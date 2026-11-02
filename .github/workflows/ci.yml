@@ -1,0 +1,82 @@
+# CI für DART 2.0 (nur synthetische Daten). In der Entwicklungsumgebung des Prototyps nicht ausgeführt – siehe Restliste R-22.
+name: CI
+on:
+  push:
+  pull_request:
+
+jobs:
+  pruefen:
+    runs-on: ubuntu-latest
+    services:
+      db:
+        image: postgres:18-alpine
+        env: { POSTGRES_PASSWORD: ci_super }
+        ports: ["5432:5432"]
+        options: --health-cmd "pg_isready -U postgres" --health-interval 5s --health-retries 20
+      vaultdb:
+        image: postgres:18-alpine
+        env: { POSTGRES_PASSWORD: ci_super }
+        ports: ["5433:5432"]
+        options: --health-cmd "pg_isready -U postgres" --health-interval 5s --health-retries 20
+      mailpit:
+        image: axllent/mailpit:v1.27
+        ports: ["1025:1025", "8025:8025"]
+    env:
+      NODE_ENV: development
+      APP_DATABASE_URL: postgres://dart_app:ci_app@localhost:5432/dart
+      MIGRATION_DATABASE_URL: postgres://dart_migration:ci_migration@localhost:5432/dart
+      WORKER_DATABASE_URL: postgres://dart_worker:ci_worker@localhost:5432/dart
+      SEED_DATABASE_URL: postgres://dart_owner:ci_owner@localhost:5432/dart
+      CORE_MIGRATION_URL: postgres://dart_owner:ci_owner@localhost:5432/dart
+      VAULT_MIGRATION_URL: postgres://vault_owner:ci_vowner@localhost:5433/dart_vault
+      VAULT_DATABASE_URL: postgres://vault_app:ci_vapp@localhost:5433/dart_vault
+      VAULT_DATA_KEY: ZGVtby1kZW1vLWRlbW8tZGVtby1kZW1vLWRlbW8tMzI=
+      VAULT_INDEX_KEY: ZGVtby1pbmRleC1rZXktbnVyLWxva2FsLWVudHdpY2s=
+      VAULT_TOKEN_API: demo-vault-token-api-0000000000
+      VAULT_TOKEN_WORKER: demo-vault-token-worker-00000000
+      VAULT_URL: http://localhost:4100
+      VAULT_LOCAL_DIR: ./var/vault-objects
+      SESSION_SECRET: demo-session-secret-nur-fuer-lokale-entwicklung-0000
+      AUTH_MODE: dev
+      SMTP_HOST: localhost
+      SMTP_PORT: "1025"
+      MAILPIT_API: http://localhost:8025
+      RATE_LIMIT_MULTIPLIER: "100"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10.28.0 }
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - name: Typprüfung und Build
+        run: pnpm build && pnpm --filter @dart/web typecheck
+      - name: Unit-Tests
+        run: pnpm test:unit && pnpm --filter @dart/vault test
+      - name: Datenbankrollen anlegen
+        run: |
+          PGPASSWORD=ci_super psql -h localhost -U postgres -c "CREATE ROLE dart_owner LOGIN BYPASSRLS PASSWORD 'ci_owner'" -c "CREATE ROLE dart_app LOGIN PASSWORD 'ci_app'" -c "CREATE ROLE dart_worker LOGIN PASSWORD 'ci_worker'" -c "CREATE ROLE dart_migration LOGIN PASSWORD 'ci_migration'" -c "CREATE DATABASE dart OWNER dart_owner"
+          PGPASSWORD=ci_super psql -h localhost -p 5433 -U postgres -c "CREATE ROLE vault_owner LOGIN PASSWORD 'ci_vowner'" -c "CREATE ROLE vault_app LOGIN PASSWORD 'ci_vapp'" -c "CREATE DATABASE dart_vault OWNER vault_owner"
+      - name: Migrationstest (zweimal = idempotent) und Seed
+        run: |
+          node migrations/migrate.mjs core && node migrations/migrate.mjs core
+          node migrations/migrate.mjs vault
+          node apps/api/dist/seed.js
+      - name: Dienste starten
+        run: |
+          PORT=4100 node apps/vault/dist/main.js > vault.log 2>&1 &
+          sleep 2
+          PORT=4000 node apps/api/dist/main.js > api.log 2>&1 &
+          PORT=4200 node apps/worker/dist/main.js > worker.log 2>&1 &
+          cp -r apps/web/.next/static apps/web/.next/standalone/apps/web/.next/static
+          (cd apps/web && API_INTERNAL_URL=http://localhost:4000 node .next/standalone/apps/web/server.js > ../../web.log 2>&1 &)
+          sleep 8
+      - name: API- und Worker-Tests (T02, T03)
+        run: pnpm test:api && pnpm --filter @dart/worker test
+      - name: E2E (Playwright)
+        run: |
+          pnpm --filter @dart/e2e exec playwright install --with-deps chromium
+          pnpm test:e2e
+      - name: Sicherheitsprüfung Abhängigkeiten
+        run: pnpm audit --prod --audit-level high
+        continue-on-error: true

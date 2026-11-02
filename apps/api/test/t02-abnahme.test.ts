@@ -426,3 +426,48 @@ describe('Weitere Prüfungen (T01/T04)', () => {
     expect(after.status).toBe(401);
   });
 });
+
+describe('F19 Exportfreigabe (zweckgebunden, Vier-Augen)', () => {
+  it('Antrag durch Forschung, keine Selbstgenehmigung, Download nur für Antragsteller, Prüfsummen', async () => {
+    const fo = await Client.login('forschung');
+    const admin = await Client.login('admin');
+    const req = await fo.post('/api/v1/exports', { purpose: 'Synthetischer Testexport zur Abnahme', scope: 'basic', periodFrom: '2026-01-01', periodTo: '2026-12-31', layers: ['normalisiert', 'scores'] });
+    expect(req.status).toBe(201);
+    expect((await fo.post(`/api/v1/exports/${req.body.id}/decide`, { decision: 'genehmigt', note: 'Selbstgenehmigung' })).status).toBe(403);
+    expect((await nord.post('/api/v1/exports', { purpose: 'Arzt darf nicht exportieren', scope: 'basic', periodFrom: '2026-01-01', periodTo: '2026-12-31', layers: ['scores'] })).status).toBe(403);
+    expect((await admin.post(`/api/v1/exports/${req.body.id}/decide`, { decision: 'genehmigt', note: 'Zweck geprüft (Test)' })).status).toBe(201);
+    // Worker (laufender Prozess) erstellt den Export asynchron
+    let job: any;
+    for (let i = 0; i < 30; i++) {
+      job = (await fo.get('/api/v1/exports')).body.items.find((x: { id: string }) => x.id === req.body.id);
+      if (job.status === 'fertig' || job.status === 'fehler') break;
+      await new Promise((r) => setTimeout(r, 1000));
+    }
+    expect(job.status, JSON.stringify(job.result_summary)).toBe('fertig');
+    const names = job.files.map((f: { name: string }) => f.name);
+    expect(names).toEqual(expect.arrayContaining(['faelle.csv', 'antworten.csv', 'scores.csv', 'datenwoerterbuch.csv', 'manifest.json']));
+    const dl = await fo.get(`/api/v1/exports/${req.body.id}/files/manifest.json`);
+    expect(dl.status).toBe(200);
+    expect(dl.headers.get('x-checksum-sha256')).toMatch(/^[0-9a-f]{64}$/);
+    expect((await admin.get(`/api/v1/exports/${req.body.id}/files/manifest.json`)).status).toBe(404);
+  });
+});
+
+describe('T04 Abgelaufener Link', () => {
+  it('abgelaufener Einladungstoken wird abgelehnt und als abgelaufen markiert', async () => {
+    const cs = await createCase(nord, C['Z-101']);
+    const docId = await consentDocId(nord);
+    const prep = await nord.post('/api/v1/consents', { patientId: cs.patientId, documentVersionId: docId, scopes: ['register_basic'], method: 'digital_demo' });
+    const owner = new Pool({ connectionString: process.env.SEED_DATABASE_URL });
+    try {
+      await owner.query(`UPDATE invitation SET expires_at = now() - interval '1 minute' WHERE patient_id = $1 AND status = 'aktiv'`, [cs.patientId]);
+      const r = await new Client().post('/api/v1/portal/redeem', { token: prep.body.onsite.token });
+      expect(r.status).toBe(400);
+      expect(r.body.message).toMatch(/abgelaufen/);
+      const st = await owner.query(`SELECT status FROM invitation WHERE patient_id = $1 ORDER BY created_at DESC LIMIT 1`, [cs.patientId]);
+      expect(st.rows[0].status).toBe('abgelaufen');
+    } finally {
+      await owner.end();
+    }
+  });
+});

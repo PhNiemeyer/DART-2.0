@@ -18,7 +18,12 @@ export default function Dashboard() {
   const [list, setList] = useState<{ items: CaseItem[]; totalCases: number; totalPatients: number; page: number; pageSize: number } | null>(null);
   const [error, setError] = useState<ApiErr | null>(null);
   const [loading, setLoading] = useState(true);
-  const [f, setF] = useState({ q: '', centerId: '', register: '', mode: '', status: '', module: '', from: '', to: '', page: 1 });
+  const [f, setF] = useState({ q: '', centerId: '', surgeonId: '', register: '', mode: '', status: '', module: '', from: '', to: '', page: 1 });
+  const [surgeons, setSurgeons] = useState<Array<{ id: string; display_name: string }>>([]);
+  useEffect(() => {
+    Promise.all(me.centers.map((c) => api(`/meta/centers/${c.id}/staff`).then((r) => r.surgeons).catch(() => [])))
+      .then((lists) => setSurgeons(lists.flat().filter((s: { id: string }, i: number, a: Array<{ id: string }>) => a.findIndex((x) => x.id === s.id) === i)));
+  }, [me.centers]);
   const [nameQ, setNameQ] = useState('');
   const [nameHits, setNameHits] = useState<Array<{ case_id: string; case_no: string; pseudonym: string; joint: string; side: string }> | null>(null);
 
@@ -89,13 +94,14 @@ export default function Dashboard() {
           {me.centers.length > 1 && (
             <div className="field"><label htmlFor="c">Zentrum</label><select id="c" value={f.centerId} onChange={(e) => set({ centerId: e.target.value })}><option value="">Alle</option>{me.centers.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}</select></div>
           )}
+          <div className="field"><label htmlFor="op">Operateur/in</label><select id="op" value={f.surgeonId} onChange={(e) => set({ surgeonId: e.target.value })}><option value="">Alle</option>{surgeons.map((s) => <option key={s.id} value={s.id}>{s.display_name}</option>)}</select></div>
           <div className="field"><label htmlFor="r">Register</label><select id="r" value={f.register} onChange={(e) => set({ register: e.target.value })}><option value="">Alle</option><option value="DART">DART</option><option value="KNORPEL_DGOU">KnorpelRegister DGOU</option><option value="DEKOR">DEKOR</option></select></div>
           <div className="field"><label htmlFor="m">Modus</label><select id="m" value={f.mode} onChange={(e) => set({ mode: e.target.value })}><option value="">Alle</option><option value="basic">DART Basic</option><option value="science">DART Science</option></select></div>
           <div className="field"><label htmlFor="mo">Modul/Eingriff</label><select id="mo" value={f.module} onChange={(e) => set({ module: e.target.value })}><option value="">Alle</option>{Object.entries(MODULE_LABEL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select></div>
           <div className="field"><label htmlFor="s">Status</label><select id="s" value={f.status} onChange={(e) => set({ status: e.target.value })}><option value="">Alle</option><option value="consent_ausstehend">Einwilligung ausstehend</option><option value="aktiv">Aktiv</option><option value="arztbogen_offen">Arztbogen offen</option><option value="ueberfaellig">Befragung überfällig</option><option value="gesperrt">Gesperrt</option></select></div>
           <div className="field"><label htmlFor="from">Bezugsdatum von</label><input id="from" type="date" value={f.from} onChange={(e) => set({ from: e.target.value })} /></div>
           <div className="field"><label htmlFor="to">Bezugsdatum bis</label><input id="to" type="date" value={f.to} onChange={(e) => set({ to: e.target.value })} /></div>
-          <div className="field" style={{ alignSelf: 'end' }}><button type="button" className="btn-ghost" onClick={() => setF({ q: '', centerId: '', register: '', mode: '', status: '', module: '', from: '', to: '', page: 1 })}>Filter zurücksetzen</button></div>
+          <div className="field" style={{ alignSelf: 'end' }}><button type="button" className="btn-ghost" onClick={() => setF({ q: '', centerId: '', surgeonId: '', register: '', mode: '', status: '', module: '', from: '', to: '', page: 1 })}>Filter zurücksetzen</button></div>
         </form>
       </section>
 

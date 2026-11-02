@@ -10,6 +10,7 @@ import { Alert, Badge, ConceptNote, ConsentBadge, ErrorBox, EventBadge, Loading 
 const TP: Record<string, string> = { BL: 'Baseline', M6: '6 Monate', M12: '12 Monate', M24: '24 Monate', M36: '36 Monate', M60: '60 Monate', M120: '120 Monate', FU3: 'FU3 (historisch)' };
 const MOD: Record<string, string> = { BASIS: 'Basis', MENISKUS: 'Meniskus', KREUZBAND: 'VKB/HKB', PATELLA: 'Patella', KNORPEL: 'Knorpel', OSTEOTOMIE: 'Osteotomie', ENDOPROTHETIK: 'Endoprothetik', SYNOVITIS: 'Synovitis', PATELLASEHNE_KONS: 'Patellasehne kons.' };
 const METHOD: Record<string, string> = { digital_demo: 'Digitale Demo-Signatur (keine QES)', papier_upload: 'Papierupload', altbestand: 'Altbestand' };
+const REG: Record<string, string> = { DART: 'DART', KNORPEL_DGOU: 'KnorpelRegister DGOU', DEKOR: 'DEKOR' };
 const REF: Record<string, string> = { op_tatsaechlich: 'tatsächliches OP-Datum', op_geplant: 'geplantes OP-Datum (vorläufig)', konservativ: 'Beginn konservative Behandlung' };
 
 export default function CasePage() {
@@ -78,8 +79,8 @@ export default function CasePage() {
       <div className="grid grid-2">
         <section className="card" aria-labelledby="h-stamm">
           <h2 id="h-stamm">Behandlung</h2>
-          <dl className="small" style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '4px 16px', margin: 0 }}>
-            <dt>Register</dt><dd style={{ margin: 0 }}>{c.registers.join(', ')}</dd>
+          <dl className="small kv">
+            <dt>Register</dt><dd style={{ margin: 0 }}>{c.registers.map((r: string) => REG[r] ?? r).join(', ')}</dd>
             <dt>Module</dt><dd style={{ margin: 0 }}>{c.modules.length ? c.modules.map((m: string) => MOD[m] ?? m).join(', ') : 'nur Basis'}</dd>
             <dt>Eingriffe</dt><dd style={{ margin: 0 }}>{d.procedures.length ? d.procedures.map((p: any) => `${p.ops_code} · ${p.concept_code} (${p.ops_version})`).join('; ') : '–'}</dd>
             <dt>Geplantes OP-Datum</dt><dd style={{ margin: 0 }}>{fmtDate(c.planned_op_date)}</dd>
