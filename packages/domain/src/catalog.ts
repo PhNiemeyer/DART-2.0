@@ -142,6 +142,9 @@ export const ASSIGNMENT_MATRIX_V1: AssignmentMatrixVersion = {
     { register: 'DART', joint: 'knie', mode: 'basic', module: 'BASIS', treatment: '*', role: 'arzt', timepoint: 'BL', questionnaire: 'KNIE-BASIC-ARZT' },
     { register: 'DART', joint: 'knie', mode: 'science', module: 'BASIS', treatment: '*', role: 'arzt', timepoint: 'BL', questionnaire: 'KNIE-BA-ARZT' },
     { register: 'DART', joint: 'knie', mode: '*', module: 'BASIS', treatment: '*', role: 'patient', timepoint: '*', questionnaire: 'KNIE-PAT' },
+    // Aus V05 abgeleitete Instrumente (Scoring Freigabe ausstehend, E-09)
+    { register: 'DART', joint: 'knie', mode: '*', module: 'BASIS', treatment: '*', role: 'patient', timepoint: '*', questionnaire: 'KNIE-IKDC' },
+    { register: 'DART', joint: 'knie', mode: '*', module: 'BASIS', treatment: '*', role: 'patient', timepoint: '*', questionnaire: 'KNIE-KOOS' },
     { register: '*', joint: 'knie', mode: '*', module: 'KNORPEL', treatment: 'operativ', role: 'arzt', timepoint: 'BL', questionnaire: 'KNIE-KNORPEL-ARZT' },
     { register: '*', joint: 'knie', mode: '*', module: 'OSTEOTOMIE', treatment: 'operativ', role: 'arzt', timepoint: 'BL', questionnaire: 'DEKOR-OSTEOTOMIE-ARZT' },
     { register: '*', joint: 'knie', mode: '*', module: 'MENISKUS', treatment: '*', role: 'arzt', timepoint: 'BL', questionnaire: 'KNIE-MENISKUS-ARZT' },

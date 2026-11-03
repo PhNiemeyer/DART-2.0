@@ -18,7 +18,7 @@ P1 = vor Pilot-MVP erforderlich, P2 = Ausbau. Fachliche Freigaben stehen in `doc
 | R-12 | P2 | Upgrades | NestJS 12, TypeScript 7, Vitest 5 prüfen (ADR-0001) |
 | R-13 | P1 | Originalscores | Historische Originalscores als `original_historisch` übernehmen, getrennt von Neuberechnung |
 | R-14 | P1 | Versand-Leitstand | Oberfläche für Dead Letters, Zustellfehler, Abmeldungen, erneutes Einreihen |
-| R-15 | P1 | Berichte | Automatisierte Tests der Nenner/Zählung; Kleingruppen in Berichten |
+| R-15 | P1 | Berichte | Autoreport (03.11.2026) mit automatisierten Tests (T05) und Kleingruppenunterdrückung; Zentrumsbericht `/auswertung` noch ohne automatisierten Nennertest |
 | R-16 | P2 | Export Rohhistorie | Berechtigter Export der Migrations-Rohhistorie |
 | R-17 | P1 | Migration | Originalexporte verschlüsselt ablegen, freigegebene Mappings (Katalog V05 liegt vor), zwei Probeläufe, Cutover-Plan (E-11, E-12) |
 | R-18 | P1 | Barrierefreiheit | Vollständiger WCAG-2.2-AA-Audit inkl. Screenreader (NVDA/VoiceOver) |
@@ -28,4 +28,5 @@ P1 = vor Pilot-MVP erforderlich, P2 = Ausbau. Fachliche Freigaben stehen in `doc
 | R-22 | P1 | CI | GitHub-Workflow ist angelegt, in dieser Umgebung aber nicht ausgeführt; im Ziel-Repository aktivieren und prüfen |
 | R-23 | P1 | Penetrationstest | Externer Test vor Produktivfreigabe |
 | R-24 | P2 | Mehrsprachigkeit | Neuanlage-Vorschlag 33 (language/translation_version): Übersetzungsversionen für Bögen und Oberfläche |
+| R-26 | P1 | Benchmarking | Risikoadjustierung (Alter, BMI, Baseline-Score), Funnel-Plot, MCID-Anteile, Freigabe der Methodik (E-18) |
 | R-25 | P1 | Mapping-Freigabe | Oberfläche, um je Katalogzeile Zielkonzept, Regel und Freigabeperson zu erfassen (Vier-Augen), daraus neue Mappingversion erzeugen |

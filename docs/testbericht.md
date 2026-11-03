@@ -7,13 +7,13 @@ Alle Daten synthetisch. Fehlschläge werden nicht als bestanden ausgewiesen.
 
 | Suite | Befehl | Ergebnis |
 |---|---|---|
-| Formularengine, Regel-DSL, Demonstrationsscore | `packages/forms: vitest` | **18 / 18 bestanden** |
-| Domäne (Follow-up, Einwilligung, Matrix, Rechte, CSV, Migration, Katalog-Mapping V05) | `packages/domain: vitest` | **19 / 19 bestanden** |
+| Formularengine, Regel-DSL, Demonstrationsscore | `packages/forms: vitest` | **36 / 36 bestanden** (inkl. IKDC/KOOS-Referenzwerte) |
+| Domäne (Follow-up, Einwilligung, Matrix, Rechte, CSV, Migration, Katalog-Mapping V05, Altersgruppe/KI) | `packages/domain: vitest` | **21 / 21 bestanden** |
 | Design-Tokens (WCAG-Kontrast) | `packages/ui: vitest` | **12 / 12 bestanden** |
 | Vault (Upload-Prüfung, Kryptografie) | `apps/vault: vitest` | **4 / 4 bestanden** |
-| API: T02-1 … T02-9, Export, abgelaufener Link, T03 inkl. Variablenkatalog V05 | `apps/api: vitest` | **30 / 30 bestanden** |
+| API: T02-1 … T02-9, Export, abgelaufener Link, T03 inkl. Variablenkatalog V05, T05 Autoreport | `apps/api: vitest` | **36 / 36 bestanden** |
 | Worker: T02-10, Dead Letter, Consent vor Versand, Export | `apps/worker: vitest` | **4 / 4 bestanden** |
-| Browser-E2E (lokal) | `tests/e2e: playwright` | **10 / 10 bestanden**, 1 übersprungen (OIDC, nur mit Profil) |
+| Browser-E2E (lokal) | `tests/e2e: playwright` | **11 / 11 bestanden**, 1 übersprungen (OIDC, nur mit Profil) |
 | Quellenprüfung Q02/Q03 | `pnpm katalog` | **17 / 17 Kennzahlen** stimmen mit dem Lastenheft (inkl. unabhängiger Neuberechnung aus V05) |
 | GitHub Actions (CI) | `.github/workflows/ci.yml` | alle Schritte grün (Build, Unit, Migration, API, Worker, E2E) |
 | Browser-E2E OIDC (Keycloak im Compose-Stack, `E2E_OIDC=1`) | `tests/e2e: playwright oidc` | **1 / 1 bestanden** |
@@ -68,6 +68,6 @@ Umgebungsvariablen (Beispiel `var/dev.env`, nicht eingecheckt):
 `VAULT_DATABASE_URL=postgres://vault_app:dev_vapp@localhost:55433/dart_vault`, Vault-Schlüssel/-Tokens und `SESSION_SECRET` aus `.env.example`,
 `VAULT_URL=http://localhost:4100`, `VAULT_LOCAL_DIR=./var/vault-objects`, `AUTH_MODE=dev`, `SMTP_HOST=localhost`, `SMTP_PORT=1025`,
 `MAILPIT_API=http://localhost:8025`, für API-Tests zusätzlich `RATE_LIMIT_MULTIPLIER=100` (in Produktion verweigert).
-Danach Migrationen, Seed, Dienste starten und `pnpm test`, `pnpm --filter @dart/worker test`, `pnpm test:e2e` ausführen.
+Danach Migrationen, Seed, Dienste starten, synthetische Demodaten laden (`node apps/api/dist/demo-daten.js`, 300 Fälle) und `pnpm test`, `pnpm --filter @dart/worker test`, `pnpm test:e2e` ausführen.
 
 Rohdaten des letzten E2E-Laufs: `docs/testbericht/e2e-ergebnis.json`.

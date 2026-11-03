@@ -1,4 +1,5 @@
 'use client';
+import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import { api, ApiErr } from '@/lib/api';
 import { fmtDate, fmtDateTime } from '@/lib/format';
@@ -41,7 +42,7 @@ export default function Reports() {
       {msg && <Alert kind="success">{msg}</Alert>}
       {can(me, 'report.read') && (
         <section className="card" aria-labelledby="h-rep">
-          <h2 id="h-rep">Zentrumsbericht</h2>
+          <div className="row between"><h2 id="h-rep" style={{ marginBottom: 0 }}>Zentrumsbericht</h2><Link className="btn" href="/auswertung/autoreport">Autoreport mit Benchmarking öffnen</Link></div>
           <form className="grid grid-3" onSubmit={(e) => e.preventDefault()}>
             {me.centers.length > 1 && <div className="field"><label htmlFor="rc">Zentrum</label><select id="rc" value={f.centerId} onChange={(e) => setF({ ...f, centerId: e.target.value })}><option value="">Alle eigenen</option>{me.centers.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}</select></div>}
             <div className="field"><label htmlFor="rf">Bezugsdatum von</label><DateInput id="rf" value={f.from} onChange={(iso) => setF({ ...f, from: iso })} /></div>

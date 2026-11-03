@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Param, ParseUUIDPipe, Post, Query, Req, Res } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { CreatePatientCaseSchema, PageQuerySchema, ReasonSchema } from '@dart/contracts';
-import { CONSENT_STATUS_LABELS, ConsentStatus, displayStatus, EventStatus, MODULES, OPS_EXAMPLES, Permission, resolveQuestionnaires } from '@dart/domain';
+import { ageGroup, CONSENT_STATUS_LABELS, ConsentStatus, displayStatus, EventStatus, MODULES, OPS_EXAMPLES, Permission, resolveQuestionnaires } from '@dart/domain';
 import { randomBytes } from 'node:crypto';
 import { Request, Response } from 'express';
 import { z } from 'zod';
@@ -252,19 +252,26 @@ export class CasesController {
         if (!s.rows.length) throw new ApiError(400, 'VALIDIERUNG', 'Operateur gehört nicht zum Zentrum');
       }
       let patientId: string;
+      let birthDate: string | null = null;
       if ('existingPatientId' in b.patient) {
-        const p = await c.query('SELECT id, center_id FROM patient WHERE id = $1', [b.patient.existingPatientId]);
+        const p = await c.query('SELECT id, center_id, vault_ref FROM patient WHERE id = $1', [b.patient.existingPatientId]);
         if (!p.rows[0] || p.rows[0].center_id !== b.centerId) throw notFound();
         patientId = p.rows[0].id;
+        // Geburtsdatum nur zur Berechnung der Altersgruppe aus dem Vault; es wird nicht im Kern gespeichert
+        if (can(actor, 'identity.read', b.centerId)) {
+          birthDate = (await this.vault.getIdentity({ centerIds: [b.centerId], actor: actor.userId, requestId: requestIdOf(req) }, p.rows[0].vault_ref).catch(() => null))?.birthDate ?? null;
+        }
       } else {
-        const p = await c.query('INSERT INTO patient (center_id, pseudonym, vault_ref, created_by) VALUES ($1,$2,$3,$4) RETURNING id', [b.centerId, newPseudonym(), vaultRef, actor.userId]);
+        birthDate = b.patient.birthDate || null;
+        const p = await c.query('INSERT INTO patient (center_id, pseudonym, vault_ref, created_by, sex) VALUES ($1,$2,$3,$4,$5) RETURNING id', [b.centerId, newPseudonym(), vaultRef, actor.userId, b.patient.sex ?? null]);
         patientId = p.rows[0].id;
         await this.audit.write(c, actor, { action: 'patient_anlegen', objectType: 'patient', objectId: patientId, centerId: b.centerId, requestId: requestIdOf(req) });
       }
       const ins = await c.query(
-        `INSERT INTO treatment_case (center_id, patient_id, joint, side, treatment_type, surgeon_user_id, planned_op_date, actual_op_date, conservative_start_date, created_by)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING id, case_no`,
-        [b.centerId, patientId, b.joint, b.side, b.treatmentType, b.surgeonUserId ?? null, b.treatmentType === 'operativ' ? b.plannedOpDate ?? null : null, b.treatmentType === 'operativ' ? b.actualOpDate ?? null : null, b.treatmentType === 'konservativ' ? b.conservativeStartDate : null, actor.userId],
+        `INSERT INTO treatment_case (center_id, patient_id, joint, side, treatment_type, surgeon_user_id, planned_op_date, actual_op_date, conservative_start_date, created_by, age_group)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING id, case_no`,
+        [b.centerId, patientId, b.joint, b.side, b.treatmentType, b.surgeonUserId ?? null, b.treatmentType === 'operativ' ? b.plannedOpDate ?? null : null, b.treatmentType === 'operativ' ? b.actualOpDate ?? null : null, b.treatmentType === 'konservativ' ? b.conservativeStartDate : null, actor.userId,
+          birthDate ? ageGroup(birthDate, (b.treatmentType === 'konservativ' ? b.conservativeStartDate : b.actualOpDate ?? b.plannedOpDate)!) : null],
       );
       const caseId = ins.rows[0].id as string;
       for (const reg of [...new Set(b.registers)]) await c.query('INSERT INTO case_register_membership (case_id, center_id, register_code) VALUES ($1,$2,$3)', [caseId, b.centerId, reg]);

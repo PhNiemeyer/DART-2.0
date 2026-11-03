@@ -129,9 +129,17 @@ export class PortalController {
         for (const e of events) {
           const st = displayStatus(e.status as EventStatus, e.window_end ?? '9999-12-31', today);
           const open = gate.ok && e.window_start <= today && e.window_end >= today && !['abgeschlossen', 'gesperrt', 'abgebrochen'].includes(e.status);
-          let responseId: string | null = null;
-          if (open) responseId = await this.followup.ensurePatientForm(c, cs, e.id, e.timepoint);
-          items.push({ eventId: e.id, timepoint: e.timepoint, dueDate: e.due_date, windowStart: e.window_start, windowEnd: e.window_end, status: gate.ok ? st : 'gesperrt', statusLabel: EVENT_STATUS_LABELS[gate.ok ? st : 'gesperrt'], responseId, open });
+          let forms: Array<{ id: string; title: string; status: string }> = [];
+          if (open) {
+            await this.followup.ensurePatientForm(c, cs, e.id, e.timepoint);
+            forms = (await c.query(
+              `SELECT r.id, q.title, r.status FROM response r JOIN questionnaire_version qv ON qv.id = r.questionnaire_version_id JOIN questionnaire q ON q.id = qv.questionnaire_id
+                WHERE r.assessment_event_id = $1 AND r.audience = 'patient' ORDER BY q.code = 'KNIE-PAT' DESC, q.code`,
+              [e.id],
+            )).rows;
+          }
+          const responseId = forms.find((f) => f.status !== 'abgeschlossen')?.id ?? forms[0]?.id ?? null;
+          items.push({ eventId: e.id, timepoint: e.timepoint, dueDate: e.due_date, windowStart: e.window_start, windowEnd: e.window_end, status: gate.ok ? st : 'gesperrt', statusLabel: EVENT_STATUS_LABELS[gate.ok ? st : 'gesperrt'], responseId, forms, open });
         }
         surveys.push({ caseLabel: `${cs.joint === 'knie' ? 'Knie' : cs.joint} ${cs.side}`, consentOk: gate.ok, consentReason: gate.reason ?? null, events: items });
       }

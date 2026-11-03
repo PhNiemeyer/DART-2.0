@@ -4,6 +4,7 @@ import { canonicalJson, DEMO_SCORE_V1, validateSchema } from '@dart/forms';
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { Client } from 'pg';
+import { buildIkdcForm, buildKoosForm } from './instruments';
 import { DEMO_CONSENT_BODY, DEMO_FORMS } from './seed-forms';
 
 /**
@@ -44,8 +45,20 @@ export const SOURCE_MANIFEST: Array<{ code: string; file: string; expected?: str
 ];
 
 /** Variablenkatalog V05 laden (idempotent: je Quell-Hash genau einmal, ältere Fassung wird ersetzt). */
+function catalogFile(): string | undefined {
+  return [join(__dirname, '../../../migrations/mapping/katalog-knie-v05.json'), join(process.cwd(), 'migrations/mapping/katalog-knie-v05.json')].find((f) => existsSync(f));
+}
+
+/** IKDC/KOOS aus dem Katalog V05 (Scoring Freigabe ausstehend). */
+function instrumentForms() {
+  const file = catalogFile();
+  if (!file) return [];
+  const cat = JSON.parse(readFileSync(file, 'utf8')).eintraege;
+  return [buildIkdcForm(cat), buildKoosForm(cat)];
+}
+
 async function seedCatalog(c: Client) {
-  const file = [join(__dirname, '../../../migrations/mapping/katalog-knie-v05.json'), join(process.cwd(), 'migrations/mapping/katalog-knie-v05.json')].find((f) => existsSync(f));
+  const file = catalogFile();
   if (!file) {
     console.log('[seed] Variablenkatalog nicht gefunden – übersprungen');
     return;
@@ -96,7 +109,8 @@ export async function seedBase(url: string): Promise<void> {
     );
     const admin = (await c.query(`SELECT id FROM app_user WHERE username = 'redaktion'`)).rows[0].id;
     const approver = (await c.query(`SELECT id FROM app_user WHERE username = 'freigabe'`)).rows[0].id;
-    for (const f of DEMO_FORMS) {
+    const instruments = instrumentForms();
+    for (const f of [...DEMO_FORMS, ...instruments]) {
       const errs = validateSchema(f);
       if (errs.length) throw new Error(`Seed-Formular ${f.code} ungültig: ${errs.map((e) => e.message).join('; ')}`);
       const q = await c.query('INSERT INTO questionnaire (code, title, audience, module_code) VALUES ($1,$2,$3,$4) ON CONFLICT (code) DO UPDATE SET title = EXCLUDED.title RETURNING id', [f.code, f.title, f.audience, f.module]);
@@ -104,8 +118,8 @@ export async function seedBase(url: string): Promise<void> {
       if (exists.rows.length) continue;
       await c.query(
         `INSERT INTO questionnaire_version (questionnaire_id, version, status, schema, schema_hash, author_id, submitted_at, approved_by, approved_at, published_by, published_at, valid_from, change_note)
-         VALUES ($1, 1, 'veroeffentlicht', $2, $3, $4, now(), $5, now(), $5, now(), '2026-01-01', 'Demonstrationsversion (Seed)')`,
-        [q.rows[0].id, JSON.stringify(f), sha(canonicalJson(f)), admin, approver],
+         VALUES ($1, 1, 'veroeffentlicht', $2, $3, $4, now(), $5, now(), $5, now(), '2026-01-01', $6)`,
+        [q.rows[0].id, JSON.stringify(f), sha(canonicalJson(f)), admin, approver, instruments.includes(f) ? 'Aus V05 (Blätter IK/KO) abgeleitet; wissenschaftliche Freigabe und Lizenzklärung ausstehend (E-09); Seed' : 'Demonstrationsversion (Seed)'],
       );
     }
     await c.query(

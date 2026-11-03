@@ -248,6 +248,21 @@ test.describe.serial('DART 2.0 – vertikale Strecke', () => {
     await page.screenshot({ path: SHOT('19-variablenkatalog'), fullPage: false });
   });
 
+  test('Autoreport: eigene Daten vs. Gesamtkollektiv mit Kennzeichnung der Abweichung', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 1100 });
+    await login(page, 'dr.nord');
+    await page.goto('/auswertung/autoreport');
+    await expect(page.getByRole('heading', { name: 'Autoreport mit Benchmarking' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Outcome nach Pathologie\/Modul/ })).toBeVisible();
+    await expect(page.getByText(/nicht risikoadjustiert/).first()).toBeVisible();
+    await expect(page.getByText(/Freigabe ausstehend/).first()).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Patientencharakteristika' })).toBeVisible();
+    expect(await unlabeledInputs(page)).toEqual([]);
+    await page.screenshot({ path: SHOT('20-autoreport'), fullPage: true });
+    await page.setViewportSize({ width: 360, height: 800 });
+    await noHorizontalScroll(page);
+  });
+
   test('Tastaturbedienung: sichtbarer Fokus und Sprunglink', async ({ page }) => {
     await page.goto('/anmelden');
     await expect(page.locator('button[data-user]').first()).toBeVisible();

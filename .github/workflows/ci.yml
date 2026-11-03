@@ -71,6 +71,8 @@ jobs:
           cp -r apps/web/.next/static apps/web/.next/standalone/apps/web/.next/static
           (cd apps/web && API_INTERNAL_URL=http://localhost:4000 node .next/standalone/apps/web/server.js > ../../web.log 2>&1 &)
           sleep 8
+      - name: Synthetische Demodaten für Autoreport (300 Fälle)
+        run: node apps/api/dist/demo-daten.js
       - name: API- und Worker-Tests (T02, T03)
         run: pnpm test:api && pnpm --filter @dart/worker test
       - name: E2E (Playwright)

@@ -4,3 +4,4 @@ export * from './catalog';
 export * from './csv';
 export * from './migration';
 export * from './katalog';
+export * from './report';

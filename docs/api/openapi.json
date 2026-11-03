@@ -1302,6 +1302,20 @@
         ]
       }
     },
+    "/api/v1/reports/auto": {
+      "get": {
+        "operationId": "AutoReportController_auto",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Auswertung"
+        ]
+      }
+    },
     "/api/v1/exports": {
       "post": {
         "operationId": "ExportsController_request",

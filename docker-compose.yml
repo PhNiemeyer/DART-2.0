@@ -89,9 +89,11 @@ services:
   migrate:
     build: { context: ., target: app, args: { IMAGE_MIRROR: "${IMAGE_MIRROR:-docker.io}" }, secrets: [extra_ca] }
     image: dart2-app:local
-    command: ["sh", "-c", "node migrations/migrate.mjs core && node migrations/migrate.mjs vault && node apps/api/dist/seed.js"]
+    command: ["sh", "-c", "node migrations/migrate.mjs core && node migrations/migrate.mjs vault && node apps/api/dist/seed.js && if [ \"$$DEMO_DATEN\" = true ] && [ \"$$NODE_ENV\" != production ]; then node apps/api/dist/demo-daten.js; fi"]
     environment:
       NODE_ENV: ${DART_ENV:-development}
+      # Synthetische Demodaten (300 Fälle) für Autoreport/Benchmarking; nie in Produktion
+      DEMO_DATEN: ${DEMO_DATEN:-true}
       CORE_MIGRATION_URL: postgres://dart_owner:${DART_OWNER_PASSWORD:-demo-owner}@db:5432/dart
       SEED_DATABASE_URL: postgres://dart_owner:${DART_OWNER_PASSWORD:-demo-owner}@db:5432/dart
       VAULT_MIGRATION_URL: postgres://vault_owner:${VAULT_OWNER_PASSWORD:-demo-vault-owner}@vault-db:5432/dart_vault
