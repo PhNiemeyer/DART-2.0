@@ -16,7 +16,8 @@
     "test:unit": "pnpm -r --filter \"./packages/*\" run test",
     "test:api": "pnpm --filter @dart/api run test",
     "test:e2e": "pnpm --filter @dart/e2e run test",
-    "quellen": "tsx tools/quellen-inventar.ts"
+    "quellen": "tsx tools/quellen-inventar.ts",
+    "katalog": "python3 -I tools/variablenkatalog.py docs/quellen"
   },
   "devDependencies": {
     "tsx": "4.23.15",

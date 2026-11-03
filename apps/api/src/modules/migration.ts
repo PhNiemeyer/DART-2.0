@@ -1,6 +1,6 @@
-import { Body, Controller, Get, Param, ParseUUIDPipe, Post, Req } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseUUIDPipe, Post, Query, Req } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { MigrationContext, normalizeLegacyRow, NormalizedRow, reconcile, RowOutcome, SYNTHETIC_MAPPING_V1 } from '@dart/domain';
+import { CatalogEntry, MappingRuleVersion, mappingFromCatalog, MigrationContext, normalizeLegacyRow, NormalizedRow, reconcile, RowOutcome, SYNTHETIC_MAPPING_V1 } from '@dart/domain';
 import { canonicalJson } from '@dart/forms';
 import { Request } from 'express';
 import { z } from 'zod';
@@ -49,6 +49,7 @@ export function parseCsv(text: string): { header: string[]; rows: string[][] } {
 }
 
 const BatchInput = z.object({
+  mapping: z.enum(['SYNTH', 'V05']).default('SYNTH'),
   fileName: z.string().min(1).max(200),
   sheet: z.string().regex(/^[A-Z0-9_]{1,20}$/),
   sourceSystem: z.string().max(60),
@@ -100,8 +101,15 @@ export class MigrationController {
     return this.db.tx({ centerIds: [] }, fn, this.db.migration);
   }
 
-  private async mappingVersion(c: Tx): Promise<string> {
-    const def = SYNTHETIC_MAPPING_V1;
+  /** Mappingdefinition: synthetisch oder aus dem Variablenkatalog V05 (Vorschlag ohne Freigabe). */
+  private async mappingDef(c: Tx, which: 'SYNTH' | 'V05'): Promise<MappingRuleVersion> {
+    if (which === 'SYNTH') return SYNTHETIC_MAPPING_V1;
+    const { rows } = await c.query(`SELECT details FROM legacy.catalog_entry WHERE catalog_code = 'KNIE-V05' ORDER BY sheet, source_row`);
+    if (!rows.length) throw new ApiError(409, 'ZUSTAND_UNZULAESSIG', 'Variablenkatalog V05 ist nicht geladen.');
+    return mappingFromCatalog(rows.map((r) => r.details as CatalogEntry));
+  }
+
+  private async mappingVersion(c: Tx, def: MappingRuleVersion): Promise<string> {
     const hash = sha256(canonicalJson(def));
     const r = await c.query(
       `INSERT INTO legacy.mapping_rule_version (code, version, status, definition, definition_sha256) VALUES ($1,$2,'vorschlag',$3,$4)
@@ -112,7 +120,7 @@ export class MigrationController {
     return r.rows[0].id;
   }
 
-  private async analyze(c: Tx, b: z.infer<typeof BatchInput>): Promise<Analysis> {
+  private async analyze(c: Tx, b: z.infer<typeof BatchInput>, mapping: MappingRuleVersion): Promise<Analysis> {
     const { header, rows } = parseCsv(b.csv);
     if (!header.length) throw new ApiError(400, 'VALIDIERUNG', 'Die Datei enthält keine Kopfzeile.');
     const dup = header.find((h, i) => header.indexOf(h) !== i);
@@ -124,7 +132,7 @@ export class MigrationController {
       const m = /^Z-?(\d+)$/.exec(ce.code);
       if (m && m[1] !== '999') centerMap[m[1]] = ce.id;
     }
-    const ctx: MigrationContext = { sourceSystem: b.sourceSystem, exportVersion: b.exportVersion, mapping: SYNTHETIC_MAPPING_V1, centerMap };
+    const ctx: MigrationContext = { sourceSystem: b.sourceSystem, exportVersion: b.exportVersion, mapping, centerMap };
     const out: Analysis['rows'] = [];
     rows.forEach((cells, i) => {
       const obj: Record<string, string> = {};
@@ -141,7 +149,60 @@ export class MigrationController {
 
   @Get('migration/mapping')
   mapping() {
-    return { mapping: SYNTHETIC_MAPPING_V1, hinweis: 'Synthetische Mappingversion (Vorschlag). Keine bestätigten Mappingregeln.' };
+    return {
+      verfuegbar: [
+        { code: 'SYNTH', mapping: SYNTHETIC_MAPPING_V1.code, sourceSystem: SYNTHETIC_MAPPING_V1.sourceSystem, exportVersions: SYNTHETIC_MAPPING_V1.exportVersions, hinweis: 'Synthetische Demonstration' },
+        { code: 'V05', mapping: 'MAP-DART-KNIE-V05', sourceSystem: 'DART-KNIE-PROD', exportVersions: ['V05'], hinweis: 'Aus Variablenkatalog V05, Status Vorschlag: ohne Freigabe wird nichts normalisiert' },
+      ],
+    };
+  }
+
+  /** Variablenkatalog V05 (Q02/Q03): Zusammenfassung. */
+  @Get('migration/catalog/summary')
+  catalogSummary() {
+    return this.tx(async (c) => {
+      const q = async (sql: string) => (await c.query(sql)).rows;
+      const base = `FROM legacy.catalog_entry WHERE catalog_code = 'KNIE-V05'`;
+      const [tot] = await q(`SELECT count(*)::int AS eintraege, count(*) FILTER (WHERE freigabe_durch IS NOT NULL)::int AS freigegeben, min(source_sha256) AS sha ${base}`);
+      return {
+        ...tot,
+        nachKlasse: await q(`SELECT klasse, count(*)::int AS n ${base} GROUP BY klasse ORDER BY klasse`),
+        nachBlatt: await q(`SELECT sheet, count(*)::int AS n, count(*) FILTER (WHERE klasse_code = 'A')::int AS a, count(*) FILTER (WHERE klasse_code = 'B')::int AS b, count(*) FILTER (WHERE klasse_code = 'C')::int AS c ${base} GROUP BY sheet ORDER BY n DESC`),
+        hinweise: await q(`SELECT h AS hinweis, count(*)::int AS n FROM legacy.catalog_entry, unnest(pruefhinweise) h WHERE catalog_code = 'KNIE-V05' GROUP BY h ORDER BY n DESC`),
+        basicScience: await q(`SELECT basic_science, count(*)::int AS n ${base} GROUP BY basic_science ORDER BY n DESC`),
+        entscheidungen: await q(`SELECT entscheidung, count(*)::int AS n ${base} GROUP BY entscheidung`),
+        neuanlage: await q(`SELECT position, zielstruktur, details FROM legacy.catalog_neuanlage WHERE catalog_code = 'KNIE-V05' ORDER BY position`),
+      };
+    });
+  }
+
+  /** Variablenkatalog durchsuchen (Blatt, Klasse, Prüfhinweis, Freitext). */
+  @Get('migration/catalog')
+  catalog(@Query() query: Record<string, string>) {
+    const p = parse(
+      z.object({ sheet: z.string().max(10).optional(), klasse: z.enum(['A', 'B', 'C']).optional(), hinweis: z.string().max(100).optional(), q: z.string().max(100).optional(), page: z.coerce.number().int().min(1).default(1) }),
+      query,
+    );
+    return this.tx(async (c) => {
+      const where = [`catalog_code = 'KNIE-V05'`];
+      const args: unknown[] = [];
+      const add = (sql: (n: number) => string, v: unknown) => {
+        args.push(v);
+        where.push(sql(args.length));
+      };
+      if (p.sheet) add((n) => `sheet = $${n}`, p.sheet);
+      if (p.klasse) add((n) => `klasse_code = $${n}`, p.klasse);
+      if (p.hinweis) add((n) => `$${n} = ANY(pruefhinweise)`, p.hinweis);
+      if (p.q) add((n) => `(alt_name ILIKE $${n} OR label ILIKE $${n} OR var_id ILIKE $${n} OR sas_alias ILIKE $${n})`, `%${p.q.replace(/[%_]/g, '')}%`);
+      const total = (await c.query(`SELECT count(*)::int AS n FROM legacy.catalog_entry WHERE ${where.join(' AND ')}`, args)).rows[0].n;
+      const { rows } = await c.query(
+        `SELECT sheet, source_row, alt_name, sas_alias, var_id, klasse, label, basic_science, vergleichbarkeit, pruefhinweise, entscheidung, freigabe_durch,
+                details->>'codeliste' AS codeliste, details->>'migrationsregel' AS migrationsregel
+           FROM legacy.catalog_entry WHERE ${where.join(' AND ')} ORDER BY sheet, source_row LIMIT 50 OFFSET ${(p.page - 1) * 50}`,
+        args,
+      );
+      return { total, page: p.page, pageSize: 50, items: rows };
+    });
   }
 
   /** Probelauf: keine Zieldaten, nur Bericht (inkl. Bilanz) und protokollierter Batch. */
@@ -149,8 +210,9 @@ export class MigrationController {
   dryRun(@CurrentActor() actor: Actor, @Body() body: unknown, @Req() req: Request) {
     const b = parse(BatchInput, body);
     return this.tx(async (c) => {
-      const mappingId = await this.mappingVersion(c);
-      const a = await this.analyze(c, b);
+      const def = await this.mappingDef(c, b.mapping);
+      const mappingId = await this.mappingVersion(c, def);
+      const a = await this.analyze(c, b, def);
       const batch = await c.query(
         `INSERT INTO legacy.migration_batch (source_system, export_version, mapping_version_id, file_name, file_sha256, mode, status, summary, created_by)
          VALUES ($1,$2,$3,$4,$5,'probelauf','probelauf',$6,$7) RETURNING id`,
@@ -172,8 +234,9 @@ export class MigrationController {
   import(@CurrentActor() actor: Actor, @Body() body: unknown, @Req() req: Request) {
     const b = parse(BatchInput, body);
     return this.tx(async (c) => {
-      const mappingId = await this.mappingVersion(c);
-      const a = await this.analyze(c, b);
+      const def = await this.mappingDef(c, b.mapping);
+      const mappingId = await this.mappingVersion(c, def);
+      const a = await this.analyze(c, b, def);
       const batch = await c.query(
         `INSERT INTO legacy.migration_batch (source_system, export_version, mapping_version_id, file_name, file_sha256, mode, status, created_by)
          VALUES ($1,$2,$3,$4,$5,'import','importiert',$6) RETURNING id`,

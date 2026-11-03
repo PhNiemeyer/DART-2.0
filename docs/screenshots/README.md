@@ -18,3 +18,4 @@
 | 16-keine-rechte.png | Zustand „keine Rechte“ (Technischer Betrieb) |
 | 17-dashboard-360.png | Dashboard bei 360 px Breite |
 | 18-fall-360.png | Falldetail bei 360 px Breite |
+| 19-variablenkatalog.png | Variablenkatalog V05 (Originalquellen), gefiltert nach Prüfhinweis |

@@ -4,7 +4,7 @@ import {
   consentAllows, canTransition, requiredScopesForCase, checklistComplete,
   resolveQuestionnaires, hasPermission,
   csvCell, toCsv,
-  normalizeLegacyRow, reconcile, sortByTimepoint, SYNTHETIC_MAPPING_V1, MigrationContext,
+  normalizeLegacyRow, reconcile, sortByTimepoint, SYNTHETIC_MAPPING_V1, MigrationContext, mappingFromCatalog,
 } from './index';
 
 describe('Follow-up-Kalender', () => {
@@ -136,5 +136,25 @@ describe('Migration (synthetisch)', () => {
   });
   it('Bilanz geht auf', () => {
     expect(reconcile(['normalisiert', 'archiviert', 'ungeklaert', 'quarantaene', 'normalisiert'])).toMatchObject({ geliefert: 5, normalisiert: 2, ausgeglichen: true });
+  });
+});
+
+describe('Katalog-Mapping V05 (ohne Freigabe)', () => {
+  const cat = [
+    { sheet: 'CA', sourceRow: 2, altName: 'P_ID', sasAlias: 'P_ID', varId: 'CA001', dartId: 'CA001', klasse: 'Überarbeitung', klasseCode: 'B' as const, label: '', vergleichbarkeit: '', basicScience: '', pruefhinweise: [], entscheidung: 'Vorschlag; fachlich offen', freigabeDurch: null, altformat: '', codeliste: '' },
+    { sheet: 'CA', sourceRow: 6, altName: 'CA_SEX', sasAlias: 'CA_SEX', varId: 'CA005', dartId: 'CA005', klasse: 'Entfall', klasseCode: 'C' as const, label: '', vergleichbarkeit: '', basicScience: '', pruefhinweise: [], entscheidung: 'Vorschlag; fachlich offen', freigabeDurch: null, altformat: '', codeliste: '' },
+    { sheet: 'CA', sourceRow: 9, altName: 'CA_X-1', sasAlias: 'CA_X_1', varId: 'CA009', dartId: null, klasse: 'Übernahme', klasseCode: 'A' as const, label: '', vergleichbarkeit: '', basicScience: '', pruefhinweise: ['Leere Checkbox nicht automatisch 0', 'eCRF-/SAS-Alias abweichend'], entscheidung: 'Vorschlag; fachlich offen', freigabeDurch: null, altformat: '', codeliste: '' },
+  ];
+  const mapping = mappingFromCatalog(cat);
+  const ctx = { sourceSystem: 'DART-KNIE-PROD', exportVersion: 'V05', mapping, centerMap: {} };
+  it('ohne Freigabe wird nichts normalisiert; Rohwerte bleiben, Entfall archiviert', () => {
+    const r = normalizeLegacyRow({ sheet: 'CA', sourceRow: 2, cells: { P_ID: '77', CA_SEX: '1', CA_X_1: '', UNBEKANNT: 'x' } }, ctx);
+    expect(r.outcome).toBe('ungeklaert');
+    expect(r.recordId).toBe('77');
+    const codes = r.issues.map((i) => i.code);
+    expect(codes).toEqual(expect.arrayContaining(['MAPPING_NICHT_FREIGEGEBEN', 'ALIAS_ABWEICHUNG', 'CHECKBOX_LEER', 'SPALTE_UNGEMAPPT']));
+    expect(r.values.find((v) => v.column === 'CA_SEX')!.outcome).toBe('archiviert');
+    expect(r.values.find((v) => v.column === 'CA_X_1')!.outcome).toBe('ungeklaert');
+    expect(r.values).toHaveLength(4);
   });
 });

@@ -1410,6 +1410,34 @@
         ]
       }
     },
+    "/api/v1/migration/catalog/summary": {
+      "get": {
+        "operationId": "MigrationController_catalogSummary",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Migration"
+        ]
+      }
+    },
+    "/api/v1/migration/catalog": {
+      "get": {
+        "operationId": "MigrationController_catalog",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Migration"
+        ]
+      }
+    },
     "/api/v1/migration-batches/dry-run": {
       "post": {
         "operationId": "MigrationController_dryRun",

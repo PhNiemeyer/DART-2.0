@@ -32,9 +32,9 @@ Alle Umsetzungen sind Prototyp-Stand mit synthetischen Daten; keine Fachfreigabe
 
 | ID | Implementierung | Tests | Status | Lücke |
 |---|---|---|---|---|
-| M01 Inventar | `tools/quellen-inventar.ts`, `legacy.source_manifest`, Web `/migration` | T03 Manifest | teilweise | echte Quellsysteme/Bestände nicht geliefert (E-12) |
+| M01 Inventar | `tools/quellen-inventar.ts`, `tools/variablenkatalog.py`, `legacy.source_manifest`, `legacy.catalog_entry`, Web `/migration` | T03 Manifest, T03 Katalog | teilweise | Katalog Knie V05 vollständig erfasst; Nicht-Knie-, KnorpelRegister-/DEKOR-Bestände und echte Exporte fehlen (E-12) |
 | M02 Unveränderte Sicherung, SHA-256, Schichten trennen | `legacy_record.raw` + Hash, `migration_batch.file_sha256` | T03 Rohwert-Nachweis | teilweise | verschlüsselte Ablage der Originalexportdatei selbst fehlt (R-17) |
-| M03 Mapping nie VARID-only; P_ID, 999, BASELINE_DATE, FU3, OPS-Konzept | `domain/migration.ts` | Unit Migration, T03 | umgesetzt (synthetisch) | echtes Mapping offen (E-11) |
+| M03 Mapping nie VARID-only; P_ID, 999, BASELINE_DATE, FU3, OPS-Konzept | `domain/migration.ts`, `domain/katalog.ts` (MAP-DART-KNIE-V05) | Unit Migration/Katalog, T03 | teilweise | Mapping V05 aus dem Katalog erzeugt, Ziele ohne Freigabe offen (E-11) |
 | M04 Null ≠ 0, Originalcodes, Klärungsliste, Vergleichbarkeitsstatus | `domain/migration.ts`, `legacy_value` | Unit, T03 | umgesetzt (synthetisch) | konkrete Klärungsfälle erst mit Q03 (E-16) |
 | M05 Batches, Dry-run, idempotent, Quarantäne, Rollback, stumm | `api/modules/migration.ts` | T03 | umgesetzt | – |
 | M06 Reconciliation | `migration.ts` (report), `docs/mapping-reconciliation-bericht.md` | T03 | teilweise | Scorestichproben, Anhänge, Cutover-Verfahren nur dokumentiert |
@@ -62,5 +62,5 @@ Alle Umsetzungen sind Prototyp-Stand mit synthetischen Daten; keine Fachfreigabe
 |---|---|---|
 | T01 REST v1, OpenAPI, Fehlercodes, If-Match, Idempotency-Key | `docs/api/openapi.json` (73 Pfade), `errors.ts`, `http.ts` | umgesetzt |
 | T02 Abnahmefälle 1–10 | `apps/api/test/t02-abnahme.test.ts`, `apps/worker/test/t02-10-versand.test.ts` | alle 10 bestanden |
-| T03 Migrationstests | `apps/api/test/t03-migration.test.ts`, Unit Migration | bestanden (synthetisch); 1.441-Zeilen-Prüfung und V05-Hash erst mit Quelle |
+| T03 Migrationstests | `apps/api/test/t03-migration.test.ts`, Unit Migration, `tools/variablenkatalog.py` | bestanden; V05-Hash stimmt, alle 1.441 Katalogzeilen und 33 Neuanlage-Vorschläge mit expliziter Klasse und Entscheidung, 0 Freigaben (keine erfunden) |
 | T04 Zusatzprüfungen | Upload/MIME/Malware, abgelaufener Link, Linkscanner, E-Mail-Fehler (Dead Letter), Datumskorrektur, Monatsende/Sommerzeit, Schemazyklus, unzulässiger Export, CSV-Formelinjektion, Tastatur, 360 px, Persistenz nach Neustart, Restore | bestanden; Screenreader-Test offen |

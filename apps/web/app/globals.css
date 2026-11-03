@@ -177,3 +177,6 @@ pre.code { background: #0f2233; color: #e6eef5; padding: 12px; border-radius: va
 .kv dd { margin: 0; overflow-wrap: anywhere; }
 @media (max-width: 480px) { .kv { grid-template-columns: minmax(0, 1fr); gap: 0; } .kv dt { font-weight: 600; margin-top: 6px; } }
 main { overflow-wrap: anywhere; }
+table.data th, table.data td { overflow-wrap: normal; word-break: normal; }
+table.data td code { overflow-wrap: anywhere; }
+table.data .nowrap { white-space: nowrap; }
