@@ -19,7 +19,8 @@ Stack wie empfohlen umgesetzt. Am 02.11.2026 geprüfte Versionen (npm-Registry),
 | Keycloak | 26.4 | stabile Linie |
 | Vitest | 3.2.7 (dist-tag `V3`) | gepflegte Linie, kompatibel mit TS 5.9 |
 | Playwright | 1.63.0 | entspricht dem in der Umgebung vorinstallierten Browser |
-| nodemailer | 7.0.13 | Typdefinitionen passend verfügbar |
+| nodemailer | 10.2.1 | Sicherheitsupdate 03.11.2026 (pnpm audit: 5 hohe Lücken in 7.x behoben); 10.2.1 statt 10.3.x, weil älter und alle Advisories ab 10.1.4 behoben |
+| Overrides | multer 2.5.0, js-yaml 5.4.1 | transitive Abhängigkeiten von NestJS/Swagger mit bekannten Lücken (pnpm audit) |
 | zod | 4.6.7 | stabil |
 
 Keine Vorabversionen. Abweichungen von „latest“ sind oben begründet (keine gleichwertige Alternative zum Stack, nur Versionswahl).

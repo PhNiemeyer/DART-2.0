@@ -13,11 +13,11 @@
   "dependencies": {
     "@dart/domain": "workspace:*",
     "@dart/forms": "workspace:*",
-    "nodemailer": "7.0.13",
+    "nodemailer": "10.2.1",
     "pg": "8.23.1"
   },
   "devDependencies": {
-    "@types/nodemailer": "7.0.12",
+    "@types/nodemailer": "8.0.2",
     "@types/pg": "8.23.1",
     "typescript": "5.9.3",
     "vitest": "3.2.7"
