@@ -4,14 +4,16 @@
   "version": "0.1.0",
   "description": "DART 2.0 – Registerplattform (lokaler Prototyp, nur synthetische Daten)",
   "packageManager": "pnpm@10.28.0",
-  "engines": { "node": ">=22" },
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
-    "build": "pnpm -r --filter ./packages/** run build && pnpm -r --filter ./apps/** run build",
-    "build:packages": "pnpm -r --filter ./packages/** run build",
+    "build": "pnpm -r --filter \"./packages/*\" run build && pnpm -r --filter \"./apps/*\" run build",
+    "build:packages": "pnpm -r --filter \"./packages/*\" run build",
     "typecheck": "pnpm -r run typecheck",
     "lint": "pnpm -r run lint",
-    "test": "pnpm -r --filter ./packages/** run test && pnpm --filter @dart/api run test",
-    "test:unit": "pnpm -r --filter ./packages/** run test",
+    "test": "pnpm -r --filter \"./packages/*\" run test && pnpm --filter @dart/api run test",
+    "test:unit": "pnpm -r --filter \"./packages/*\" run test",
     "test:api": "pnpm --filter @dart/api run test",
     "test:e2e": "pnpm --filter @dart/e2e run test",
     "quellen": "tsx tools/quellen-inventar.ts"
