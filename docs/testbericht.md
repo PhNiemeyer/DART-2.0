@@ -8,12 +8,14 @@ Alle Daten synthetisch. Fehlschläge werden nicht als bestanden ausgewiesen.
 | Suite | Befehl | Ergebnis |
 |---|---|---|
 | Formularengine, Regel-DSL, Demonstrationsscore | `packages/forms: vitest` | **18 / 18 bestanden** |
-| Domäne (Follow-up, Einwilligung, Matrix, Rechte, CSV, Migration) | `packages/domain: vitest` | **18 / 18 bestanden** |
+| Domäne (Follow-up, Einwilligung, Matrix, Rechte, CSV, Migration, Katalog-Mapping V05) | `packages/domain: vitest` | **19 / 19 bestanden** |
 | Design-Tokens (WCAG-Kontrast) | `packages/ui: vitest` | **12 / 12 bestanden** |
 | Vault (Upload-Prüfung, Kryptografie) | `apps/vault: vitest` | **4 / 4 bestanden** |
-| API: T02-1 … T02-9, Export, abgelaufener Link, T03 | `apps/api: vitest` | **27 / 27 bestanden** |
+| API: T02-1 … T02-9, Export, abgelaufener Link, T03 inkl. Variablenkatalog V05 | `apps/api: vitest` | **30 / 30 bestanden** |
 | Worker: T02-10, Dead Letter, Consent vor Versand, Export | `apps/worker: vitest` | **4 / 4 bestanden** |
-| Browser-E2E (lokal und gegen `docker compose`) | `tests/e2e: playwright` | **9 / 9 bestanden**, 1 übersprungen (OIDC, nur mit Profil) |
+| Browser-E2E (lokal) | `tests/e2e: playwright` | **10 / 10 bestanden**, 1 übersprungen (OIDC, nur mit Profil) |
+| Quellenprüfung Q02/Q03 | `pnpm katalog` | **17 / 17 Kennzahlen** stimmen mit dem Lastenheft (inkl. unabhängiger Neuberechnung aus V05) |
+| GitHub Actions (CI) | `.github/workflows/ci.yml` | alle Schritte grün (Build, Unit, Migration, API, Worker, E2E) |
 | Browser-E2E OIDC (Keycloak im Compose-Stack, `E2E_OIDC=1`) | `tests/e2e: playwright oidc` | **1 / 1 bestanden** |
 
 Gefundene und behobene Fehler während der Tests (Auszug): mehrdeutige SQL-Spalte in der Konfliktantwort (Autosave-Konflikt lieferte 500 statt 409);
@@ -42,7 +44,7 @@ danach vier aufeinanderfolgende Läufe ohne Fehler.
 - **Screenreader-Test** (NVDA/VoiceOver) – nicht durchgeführt; automatisiert geprüft wurden nur Beschriftungen, Fokus, Sprunglink und 360 px (Dashboard, Falldetail, Portal); aria-live ist implementiert, aber nicht automatisiert geprüft.
 - **Penetrationstest** – nicht durchgeführt.
 - **Produktiver Malwarescanner** – nur Demo-Adapter (EICAR).
-- **Migration mit Originalquellen** – Q02/Q03 nicht geliefert; alle Migrationstests mit synthetischer Quelle und synthetischem Mapping.
+- **Migration echter Bestände** – Q02/Q03 liegen vor und sind geprüft; echte Patientenexporte liegen nicht vor. Migrationstests mit synthetischen Werten (auch mit echten V05-Spaltennamen).
 - Datumsfelder zeigen im Headless-Browser das US-Format des Browser-UI (`mm/dd/yyyy`); deutsche Browser zeigen TT.MM.JJJJ. Alle Datumsangaben im Text werden als TT.MM.JJJJ formatiert.
 
 ## Testumgebung reproduzieren

@@ -124,7 +124,7 @@ migrations/     SQL-Migrationen (core, vault) und Läufer
 infra/          Datenbank-Init, Keycloak-Realm, S3-Konfiguration
 tests/          E2E (Playwright) und synthetische Fixtures
 docs/           ADR, Entscheidungen, Traceability, Testbericht, Screenshots, Betrieb, Datenschutz
-tools/          Quelleninventar, Restore-Probe
+tools/          Quelleninventar, Variablenkatalog (Python/openpyxl), Restore-Probe
 ```
 
 ## Dokumentation
@@ -132,5 +132,5 @@ tools/          Quelleninventar, Restore-Probe
 - [Architektur und Datenmodell](docs/architektur.md) · [ADR](docs/adr/) · [Rollenmatrix](docs/rollenmatrix.md)
 - [Offene Fachfragen und Entscheidungen](docs/entscheidungen.md) · [Traceability F/M/D/U/T](docs/traceability.md)
 - [Testbericht](docs/testbericht.md) · [Screenshots](docs/screenshots/README.md) · [Mapping-/Reconciliation-Bericht](docs/mapping-reconciliation-bericht.md)
-- [Quellenmanifest](docs/quellenmanifest.md) · [Design-Tokens](docs/design-tokens.md) · [Betrieb](docs/betrieb.md) · [Datenschutz](docs/datenschutz.md)
+- [Quellenanalyse Q02/Q03](docs/quellenanalyse.md) · [Neuanlage-Zuordnung](docs/neuanlage-zuordnung.md) · [Quellenmanifest](docs/quellenmanifest.md) · [Design-Tokens](docs/design-tokens.md) · [Betrieb](docs/betrieb.md) · [Datenschutz](docs/datenschutz.md)
 - [Priorisierte Restliste](docs/restliste.md) · [OpenAPI](docs/api/openapi.json)

@@ -2,7 +2,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { api, ApiErr } from '@/lib/api';
 import { fmtDateTime } from '@/lib/format';
-import { SAMPLE_CSV } from '@/lib/sample-csv';
+import { SAMPLE_CSV, SAMPLE_CSV_V05 } from '@/lib/sample-csv';
+import { Catalog } from './catalog';
 import { Alert, Badge, ConceptNote, ErrorBox } from '@/components/ui';
 
 const OUT: Record<string, string> = { normalisiert: 'Normalisiert', archiviert: 'Bewusst historisch archiviert', ungeklaert: 'Gesichert, ungeklärt', quarantaene: 'Quarantäne' };
@@ -23,7 +24,9 @@ function Summary({ s }: { s: any }) {
 
 export default function Migration() {
   const [csv, setCsv] = useState('');
-  const [meta, setMeta] = useState({ fileName: 'altexport-synthetisch-CA.csv', sheet: 'CA', sourceSystem: 'DART-ALT-SYNTH', exportVersion: 'SYNTH-1' });
+  const [meta, setMeta] = useState({ mapping: 'SYNTH', fileName: 'altexport-synthetisch-CA.csv', sheet: 'CA', sourceSystem: 'DART-ALT-SYNTH', exportVersion: 'SYNTH-1' });
+  const chooseMapping = (m: string) =>
+    setMeta(m === 'V05' ? { mapping: 'V05', fileName: meta.fileName, sheet: meta.sheet, sourceSystem: 'DART-KNIE-PROD', exportVersion: 'V05' } : { mapping: 'SYNTH', fileName: meta.fileName, sheet: meta.sheet, sourceSystem: 'DART-ALT-SYNTH', exportVersion: 'SYNTH-1' });
   const [result, setResult] = useState<any>(null);
   const [batches, setBatches] = useState<any[]>([]);
   const [manifest, setManifest] = useState<any[]>([]);
@@ -44,25 +47,27 @@ export default function Migration() {
     <>
       <h1>Historische Migration</h1>
       <ConceptNote />
-      <Alert kind="info">Prototyp mit synthetischer Quelle „DART-ALT-SYNTH“ und Mappingversion MAP-DART-ALT-SYNTH V1 (Vorschlag, keine bestätigten Mappingregeln). Rohwerte werden unverändert gesichert; nichts wird still repariert.</Alert>
+      <Alert kind="info">Zwei Mappingversionen: die synthetische Demonstration „MAP-DART-ALT-SYNTH“ und „MAP-DART-KNIE-V05“ aus dem Variablenkatalog V05. Beide sind Vorschläge ohne Fachfreigabe; mit V05 wird daher nichts normalisiert, alle Rohwerte werden unverändert gesichert und als ungeklärt bilanziert. Nur synthetische Exporte verwenden.</Alert>
       <ErrorBox error={error} />
       {msg && <Alert kind="success">{msg}</Alert>}
       <section className="card">
         <h2>Quellenmanifest</h2>
         <div className="table-wrap"><table className="data cards"><thead><tr><th>Quelle</th><th>Datei</th><th>Status</th><th>Hinweis</th></tr></thead>
-          <tbody>{manifest.map((m) => <tr key={m.id}><td data-label="Quelle">{m.source_code}</td><td data-label="Datei">{m.file_name}{m.expected_sha256 && <div className="small muted">erwarteter SHA-256: {m.expected_sha256.slice(0, 16)}…</div>}</td><td data-label="Status"><Badge tone={m.status === 'vorhanden' ? 'ok' : 'warn'}>{m.status}</Badge></td><td data-label="Hinweis" className="small">{m.note}</td></tr>)}</tbody>
+          <tbody>{manifest.map((m) => <tr key={m.id}><td data-label="Quelle">{m.source_code}</td><td data-label="Datei">{m.file_name}{m.expected_sha256 && <div className="small muted">erwarteter SHA-256: {m.expected_sha256.slice(0, 16)}…</div>}{m.actual_sha256 && <div className="small muted">geprüfter SHA-256: {m.actual_sha256.slice(0, 16)}…{m.expected_sha256 ? (m.actual_sha256 === m.expected_sha256 ? ' (stimmt)' : ' (ABWEICHEND)') : ''}</div>}</td><td data-label="Status"><Badge tone={m.status === 'vorhanden' ? 'ok' : 'warn'}>{m.status}</Badge></td><td data-label="Hinweis" className="small">{m.note}</td></tr>)}</tbody>
         </table></div>
       </section>
+      <Catalog onError={setError} />
       <section className="card">
         <h2>Batch ausführen</h2>
         <div className="grid grid-3">
+          <div className="field"><label htmlFor="mp">Mappingversion</label><select id="mp" value={meta.mapping} onChange={(e) => chooseMapping(e.target.value)}><option value="SYNTH">MAP-DART-ALT-SYNTH V1 (synthetisch)</option><option value="V05">MAP-DART-KNIE-V05 V1 (aus Katalog, ohne Freigabe)</option></select></div>
           <div className="field"><label htmlFor="fn">Dateiname</label><input id="fn" type="text" value={meta.fileName} onChange={(e) => setMeta({ ...meta, fileName: e.target.value })} /></div>
           <div className="field"><label htmlFor="sh">Blatt</label><input id="sh" type="text" value={meta.sheet} onChange={(e) => setMeta({ ...meta, sheet: e.target.value.toUpperCase() })} /></div>
           <div className="field"><label htmlFor="ev">Exportversion</label><input id="ev" type="text" value={meta.exportVersion} onChange={(e) => setMeta({ ...meta, exportVersion: e.target.value })} /></div>
         </div>
         <div className="field"><label htmlFor="csv">CSV-Inhalt (Semikolon oder Komma)</label><textarea id="csv" rows={8} value={csv} onChange={(e) => setCsv(e.target.value)} style={{ fontFamily: 'monospace', fontSize: '.85rem' }} /></div>
         <div className="row">
-          <button className="btn-ghost" onClick={() => setCsv(SAMPLE_CSV)}>Synthetische Beispieldatei laden</button>
+          <button className="btn-ghost" onClick={() => { setCsv(meta.mapping === 'V05' ? SAMPLE_CSV_V05 : SAMPLE_CSV); setMeta({ ...meta, fileName: meta.mapping === 'V05' ? 'v05-synthetisch-CA.csv' : 'altexport-synthetisch-CA.csv', sheet: 'CA' }); }}>Synthetische Beispieldatei laden</button>
           <label className="btn btn-ghost" style={{ cursor: 'pointer' }}>Datei wählen<input type="file" accept=".csv,text/csv" className="sr-only" onChange={async (e) => { const f = e.target.files?.[0]; if (f) { setCsv(await f.text()); setMeta({ ...meta, fileName: f.name }); } }} /></label>
           <button className="btn-secondary" disabled={!csv} onClick={() => run('dry-run')}>Probelauf (Dry-run)</button>
           <button disabled={!csv} onClick={() => run('import')}>Importieren</button>

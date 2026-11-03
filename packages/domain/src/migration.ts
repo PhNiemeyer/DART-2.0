@@ -23,7 +23,9 @@ export type TargetSpec =
   | { kind: 'side' }
   | { kind: 'variable'; concept: string; type: 'code' | 'number' | 'date' | 'text' | 'checkbox' }
   | { kind: 'ops'; conceptColumn?: string }
-  | { kind: 'archive' };
+  | { kind: 'archive' }
+  /** Zielkonzept nicht freigegeben: Rohwert sichern, als ungeklärt kennzeichnen. */
+  | { kind: 'offen'; checkbox?: boolean };
 
 export interface MappingEntry {
   sheet: string;
@@ -42,6 +44,8 @@ export interface MappingEntry {
 export interface MappingRuleVersion {
   code: string;
   version: number;
+  /** Ohne Freigabe werden „offene“ Ziele nie normalisiert. */
+  status?: 'vorschlag' | 'freigegeben';
   sourceSystem: string;
   exportVersions: string[];
   /** Codeliste Visitcode → Zeitpunkt (nicht numerisch sortieren!). */
@@ -151,6 +155,7 @@ export function normalizeLegacyRow(row: LegacyRowInput, ctx: MigrationContext): 
   for (const e of ctx.mapping.entries.filter((x) => x.sheet === row.sheet && x.varId)) varIdCount.set(e.varId!, (varIdCount.get(e.varId!) ?? 0) + 1);
 
   let allArchive = true;
+  let openColumns = 0;
   for (const [column, rawIn] of Object.entries(row.cells)) {
     const raw = rawIn ?? '';
     const { entry, viaAlias, ambiguous } = findEntry(ctx.mapping, row.sheet, column);
@@ -245,6 +250,14 @@ export function normalizeLegacyRow(row: LegacyRowInput, ctx: MigrationContext): 
       case 'archive':
         pushValue({ outcome: 'archiviert', comparability: 'nicht_vergleichbar' });
         break;
+      case 'offen': {
+        if (!entry.varId) issues.push({ code: 'VARID_FEHLT', message: `Spalte „${column}“ ohne VARID; zusammengesetzter Quellschlüssel ${base.sourceKey}`, column, blocking: false });
+        else if ((varIdCount.get(entry.varId) ?? 0) > 1) issues.push({ code: 'VARID_MEHRFACH', message: `VARID „${entry.varId}“ kommt im Blatt ${row.sheet} mehrfach vor`, column, blocking: false });
+        if (t.checkbox && raw === '') issues.push({ code: 'CHECKBOX_LEER', message: `Leere Checkbox „${column}“ wird nicht als Nein/0 interpretiert`, column, blocking: false });
+        openColumns++;
+        pushValue({ concept: entry.varId ? `${row.sheet}:${entry.varId}` : null });
+        break;
+      }
       case 'variable': {
         if (!entry.varId) {
           issues.push({ code: 'VARID_FEHLT', message: `Spalte „${column}“ ohne VARID; zusammengesetzter Quellschlüssel ${base.sourceKey}`, column, blocking: false });
@@ -296,6 +309,13 @@ export function normalizeLegacyRow(row: LegacyRowInput, ctx: MigrationContext): 
     }
   }
 
+  if (openColumns > 0) {
+    issues.push({
+      code: 'MAPPING_NICHT_FREIGEGEBEN',
+      message: `${openColumns} Spalte(n) ohne freigegebenes Zielkonzept (Mappingversion ${ctx.mapping.code} V${ctx.mapping.version}, Status ${ctx.mapping.status ?? 'vorschlag'}); Rohwerte gesichert`,
+      blocking: ctx.mapping.status !== 'freigegeben',
+    });
+  }
   if (issues.some((i) => i.blocking)) out.outcome = 'ungeklaert';
   else if (allArchive && values.length > 0) out.outcome = 'archiviert';
   return out;

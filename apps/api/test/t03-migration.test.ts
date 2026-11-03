@@ -66,10 +66,49 @@ describe('T03 Migration', () => {
     expect(r.body.summary.werte.ausgeglichen).toBe(true);
   });
 
-  it('Quellenmanifest meldet fehlende Quellen inkl. erwartetem V05-Hash', async () => {
+  it('Quellenmanifest: V05 mit erwartetem Hash vorhanden, nicht gelieferte Quellen weiterhin als fehlend gemeldet', async () => {
     const m = (await dm.get('/api/v1/migration/manifest')).body.items;
     const v05 = m.find((x: { source_code: string }) => x.source_code === 'Q03');
-    expect(v05.status).toBe('fehlt');
+    expect(v05.status).toBe('vorhanden');
     expect(v05.expected_sha256).toBe('23b554addc046957c7f665e5e31a7c9f8bbb627124f30d1c8ad943de6789cb9b');
+    expect(m.find((x: { source_code: string }) => x.source_code === 'Q08').status).toBe('fehlt');
+  });
+});
+
+describe('T03 Variablenkatalog V05 (Originalquellen Q02/Q03)', () => {
+  it('alle 1.441 Katalogzeilen und 33 Neuanlage-Vorschläge geladen, jede mit expliziter Klasse und Entscheidung, keine erfundene Freigabe', async () => {
+    const s = (await dm.get('/api/v1/migration/catalog/summary')).body;
+    expect(s.eintraege).toBe(1441);
+    expect(s.freigegeben).toBe(0);
+    expect(Object.fromEntries(s.nachKlasse.map((x: { klasse: string; n: number }) => [x.klasse, x.n]))).toEqual({ Entfall: 20, Übernahme: 753, Überarbeitung: 668 });
+    expect(s.entscheidungen).toEqual([{ entscheidung: 'Vorschlag; fachlich offen', n: 1441 }]);
+    expect(s.neuanlage).toHaveLength(33);
+    const h = Object.fromEntries(s.hinweise.map((x: { hinweis: string; n: number }) => [x.hinweis, x.n]));
+    expect(h['eCRF-/SAS-Alias abweichend']).toBe(285);
+    expect(h['VARID fehlt']).toBe(34);
+    expect(h['VARID im Blatt mehrfach']).toBe(10);
+    expect(h['Leere Checkbox nicht automatisch 0']).toBe(355);
+    const m = (await dm.get('/api/v1/migration/manifest')).body.items.find((x: { source_code: string }) => x.source_code === 'Q03');
+    expect(m.status).toBe('vorhanden');
+    expect(m.actual_sha256).toBe(m.expected_sha256);
+  });
+
+  it('Katalogsuche filtert nach Blatt, Klasse und Prüfhinweis', async () => {
+    const r = (await dm.get(`/api/v1/migration/catalog?hinweis=${encodeURIComponent('VARID im Blatt mehrfach')}`)).body;
+    expect(r.total).toBe(10);
+    const c = (await dm.get('/api/v1/migration/catalog?sheet=CA&klasse=C')).body;
+    expect(c.total).toBe(13);
+    expect(c.items.every((x: { klasse: string }) => x.klasse === 'Entfall')).toBe(true);
+  });
+
+  it('Probelauf mit V05-Spalten: ohne Freigabe nichts normalisiert, Rohwerte vollständig bilanziert', async () => {
+    const csv = readFileSync(join(__dirname, '../../../tests/fixtures/v05-synthetisch-CA.csv'), 'utf8');
+    const r = await dm.post('/api/v1/migration-batches/dry-run', { mapping: 'V05', fileName: 'v05-synthetisch-CA.csv', sheet: 'CA', sourceSystem: 'DART-KNIE-PROD', exportVersion: 'V05', csv });
+    expect(r.status, JSON.stringify(r.body)).toBe(201);
+    const s = r.body.summary;
+    expect(s.zeilen).toMatchObject({ geliefert: 3, normalisiert: 0, ungeklaert: 3, ausgeglichen: true });
+    expect(s.werte).toMatchObject({ geliefert: 24, erfasst: 24, ausgeglichen: true });
+    expect(s.werte.nachErgebnis.archiviert).toBe(3); // CA_SEX: Klasse Entfall
+    for (const code of ['MAPPING_NICHT_FREIGEGEBEN', 'PID_IST_BELEG_ID', 'ALIAS_ABWEICHUNG', 'VARID_FEHLT', 'SPALTE_UNGEMAPPT']) expect(s.hinweise[code], code).toBeGreaterThan(0);
   });
 });

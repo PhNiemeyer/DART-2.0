@@ -1,6 +1,8 @@
 import { createHash } from 'node:crypto';
 import { ASSIGNMENT_MATRIX_V1, FOLLOWUP_PLAN_V1 } from '@dart/domain';
 import { canonicalJson, DEMO_SCORE_V1, validateSchema } from '@dart/forms';
+import { existsSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { Client } from 'pg';
 import { DEMO_CONSENT_BODY, DEMO_FORMS } from './seed-forms';
 
@@ -25,9 +27,9 @@ export const DEMO_USERS: Array<{ username: string; name: string; roles: Array<[s
 ];
 
 /** Quellen laut Lastenheft; im Arbeitsverzeichnis nicht vorhanden → als fehlend gemeldet. */
-export const SOURCE_MANIFEST: Array<{ code: string; file: string; expected?: string; note: string }> = [
-  { code: 'Q02', file: 'DART_2_Variablenklassifikation.xlsx', note: 'Nicht im Arbeitsverzeichnis geliefert; Kennzahlen (1.441 Zeilen) nur aus dem Lastenheft übernommen' },
-  { code: 'Q03', file: 'PROD_DatabaseDescriptionPlan_DART_Knie_V05.xlsx', expected: '23b554addc046957c7f665e5e31a7c9f8bbb627124f30d1c8ad943de6789cb9b', note: 'Nicht geliefert; Hash-Prüfung erfolgt bei Lieferung (tools/quellen-inventar.ts)' },
+export const SOURCE_MANIFEST: Array<{ code: string; file: string; expected?: string; actual?: string; note: string }> = [
+  { code: 'Q02', file: 'DART_2_Variablenklassifikation.xlsx', actual: '0a333a5632762ceda5c355bfda62402fc506a9e57fec49147a4cd0e9a9ed0778', note: 'Geliefert 03.11.2026; 1.441 Katalogzeilen und 33 Neuanlage-Vorschläge nachgezählt (docs/quellenanalyse.md)' },
+  { code: 'Q03', file: 'PROD_DatabaseDescriptionPlan_DART_Knie_V05.xlsx', expected: '23b554addc046957c7f665e5e31a7c9f8bbb627124f30d1c8ad943de6789cb9b', actual: '23b554addc046957c7f665e5e31a7c9f8bbb627124f30d1c8ad943de6789cb9b', note: 'Geliefert 03.11.2026; SHA-256 stimmt mit dem Lastenheft überein' },
   { code: 'Q04', file: 'ePIC_DART_V01_final_20170912.docx', note: 'Nicht geliefert' },
   { code: 'Q05', file: 'Datenschutzkonzept_DART_V01_20170922.pdf', note: 'Nicht geliefert' },
   { code: 'Q06', file: 'DEKOR Arztbogen Basisfragen.pdf', note: 'Nicht geliefert; DEKOR-Beispiel im Prototyp ist eine eigene Demonstration' },
@@ -40,6 +42,32 @@ export const SOURCE_MANIFEST: Array<{ code: string; file: string; expected?: str
   { code: 'Q-LH', file: 'DART_2_0_Lastenheft.pdf', note: 'Geliefert (Fassung 1.0, 02.11.2026)' },
   { code: 'Q-MP', file: 'DART_2_0_Claude_Code_Masterprompt.md', note: 'Geliefert' },
 ];
+
+/** Variablenkatalog V05 laden (idempotent: je Quell-Hash genau einmal, ältere Fassung wird ersetzt). */
+async function seedCatalog(c: Client) {
+  const file = [join(__dirname, '../../../migrations/mapping/katalog-knie-v05.json'), join(process.cwd(), 'migrations/mapping/katalog-knie-v05.json')].find((f) => existsSync(f));
+  if (!file) {
+    console.log('[seed] Variablenkatalog nicht gefunden – übersprungen');
+    return;
+  }
+  const cat = JSON.parse(readFileSync(file, 'utf8'));
+  const code = 'KNIE-V05';
+  const sha = cat.quelle.datenbankbeschreibung.sha256 + ':' + cat.quelle.klassifikation.sha256;
+  const cur = await c.query('SELECT count(*)::int AS n, min(source_sha256) AS sha FROM legacy.catalog_entry WHERE catalog_code = $1', [code]);
+  if (cur.rows[0].n === cat.eintraege.length && cur.rows[0].sha === sha) return;
+  await c.query('DELETE FROM legacy.catalog_entry WHERE catalog_code = $1', [code]);
+  await c.query('DELETE FROM legacy.catalog_neuanlage WHERE catalog_code = $1', [code]);
+  for (const e of cat.eintraege) {
+    await c.query(
+      `INSERT INTO legacy.catalog_entry (catalog_code, source_sha256, sheet, source_row, alt_name, sas_alias, var_id, dart_id, klasse, klasse_code, label, basic_science, vergleichbarkeit, pruefhinweise, entscheidung, freigabe_durch, details)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)`,
+      [code, sha, e.sheet, e.sourceRow, e.altName, e.sasAlias, e.varId, e.dartId, e.klasse, e.klasseCode, e.label, e.basicScience, e.vergleichbarkeit, e.pruefhinweise, e.entscheidung, e.freigabeDurch, JSON.stringify(e)],
+    );
+  }
+  let i = 0;
+  for (const n of cat.neuanlage) await c.query('INSERT INTO legacy.catalog_neuanlage (catalog_code, position, zielstruktur, details) VALUES ($1,$2,$3,$4)', [code, ++i, n['Zielvariable / Struktur'], JSON.stringify(n)]);
+  console.log(`[seed] Variablenkatalog ${code}: ${cat.eintraege.length} Einträge, ${cat.neuanlage.length} Neuanlage-Vorschläge`);
+}
 
 export async function seedBase(url: string): Promise<void> {
   const c = new Client({ connectionString: url });
@@ -87,12 +115,14 @@ export async function seedBase(url: string): Promise<void> {
     await c.query(`INSERT INTO followup_plan_version (code, version, status, definition) VALUES ($1,$2,$3,$4) ON CONFLICT DO NOTHING`, [FOLLOWUP_PLAN_V1.code, FOLLOWUP_PLAN_V1.version, FOLLOWUP_PLAN_V1.status, JSON.stringify(FOLLOWUP_PLAN_V1)]);
     await c.query(`INSERT INTO assignment_matrix_version (code, version, status, valid_from, definition) VALUES ($1,$2,$3,$4,$5) ON CONFLICT DO NOTHING`, [ASSIGNMENT_MATRIX_V1.code, ASSIGNMENT_MATRIX_V1.version, ASSIGNMENT_MATRIX_V1.status, ASSIGNMENT_MATRIX_V1.validFrom, JSON.stringify(ASSIGNMENT_MATRIX_V1)]);
     for (const s of SOURCE_MANIFEST) {
-      const status = s.code === 'Q-LH' || s.code === 'Q-MP' ? 'vorhanden' : 'fehlt';
+      const status = ['Q-LH', 'Q-MP', 'Q02', 'Q03'].includes(s.code) ? 'vorhanden' : 'fehlt';
       await c.query(
-        `INSERT INTO legacy.source_manifest (source_code, file_name, expected_sha256, status, note) VALUES ($1,$2,$3,$4,$5) ON CONFLICT (source_code, file_name) DO NOTHING`,
-        [s.code, s.file, s.expected ?? null, status, s.note],
+        `INSERT INTO legacy.source_manifest (source_code, file_name, expected_sha256, actual_sha256, status, note) VALUES ($1,$2,$3,$4,$5,$6)
+         ON CONFLICT (source_code, file_name) DO UPDATE SET actual_sha256 = EXCLUDED.actual_sha256, status = EXCLUDED.status, note = EXCLUDED.note`,
+        [s.code, s.file, s.expected ?? null, s.actual ?? null, status, s.note],
       );
     }
+    await seedCatalog(c);
     await c.query('COMMIT');
     console.log('[seed] Basisdaten aktuell (synthetisch)');
   } catch (e) {

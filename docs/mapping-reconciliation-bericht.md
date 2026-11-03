@@ -1,8 +1,8 @@
 # Mapping- und Reconciliation-Bericht (synthetischer Probelauf)
 
 > Grundlage: **synthetische** Quelle `tests/fixtures/altexport-synthetisch-CA.csv` (Quellsystem `DART-ALT-SYNTH`, Exportversion `SYNTH-1`)
-> und die **synthetische** Mappingversion `MAP-DART-ALT-SYNTH` V1 (Status „Vorschlag“). Die Originalquellen Q02 (Variablenklassifikation,
-> 1.441 Katalogzeilen) und Q03 (Datenbankbeschreibung V05, erwarteter SHA-256 `23b554ad…cb9b`) liegen **nicht** vor.
+> und die **synthetische** Mappingversion `MAP-DART-ALT-SYNTH` V1 (Status „Vorschlag“).
+> Seit 03.11.2026 liegen Q02/Q03 vor (siehe Abschnitt „Mappingversion aus dem Katalog V05“ unten); echte Patientenexporte liegen nicht vor.
 > Dieser Bericht belegt das Verfahren, nicht die Migration realer Bestände. Er wird mit `/migration` → „Reconciliation-Bericht“ erzeugt.
 
 ## Bilanz (Zeilen)
@@ -43,3 +43,23 @@ Formelartige Altwerte (z. B. `=SUMME(A1)`) bleiben als Rohwert unverändert; im 
 3. Mindestens zwei Probeläufe mit vollständigem Export, Reconciliation je Quelltabelle, Zentrum, Fall, Zeitpunkt, Variable inkl.
    Scorestichproben und Anhang-Hashes; danach Cutover mit Schreibstopp/Delta, finalem Abgleich, Freigabe und Rückfallplan.
 4. Bestätigte Personenverknüpfung (`legacy_key_map`) – nie automatisch über P_ID, Patientennummer oder OP-Datum.
+
+## Mappingversion aus dem Katalog V05 (`MAP-DART-KNIE-V05` V1, Vorschlag)
+
+Erzeugt aus `migrations/mapping/katalog-knie-v05.json` (1.441 Einträge aus Q02, abgeglichen mit Q03). Regeln:
+
+| Katalog | Ziel | Ergebnis im Import |
+|---|---|---|
+| `P_ID` (je Blatt) | technische Beleg-ID | normalisiert als Beleg-ID, **keine** Patientenkennung |
+| Klasse C (Entfall, 20 Zeilen) | bewusst historisch archiviert | „archiviert“, nicht vergleichbar |
+| alle übrigen Variablen | **offen** (kein freigegebenes Zielkonzept) | Rohwert gesichert, „ungeklärt“; Hinweis `MAPPING_NICHT_FREIGEGEBEN` (blockierend) |
+
+Zuordnung je Blatt über eCRF-Namen oder SAS-Alias (285 abweichende Aliase), nie über VARID allein. Hinweise aus dem Katalog
+(VARID fehlt, VARID mehrfach, leere Checkbox) werden als Klärungsfälle ausgegeben.
+
+Probelauf mit `tests/fixtures/v05-synthetisch-CA.csv` (echte Spaltennamen aus Blatt CA, synthetische Werte): 3 Zeilen geliefert →
+0 normalisiert, 3 ungeklärt, Bilanz ausgeglichen; 24 von 24 Zellen erfasst, davon 3 archiviert (`CA_SEX`, Klasse Entfall).
+Klärungsfälle: `MAPPING_NICHT_FREIGEGEBEN`, `PID_IST_BELEG_ID`, `ALIAS_ABWEICHUNG`, `VARID_FEHLT`, `SPALTE_UNGEMAPPT`.
+
+Das ist der fachlich korrekte Ausgangszustand: Erst mit einer Freigabe je Variable (Zielkonzept, Transformationsregel,
+Freigabeperson; Restliste R-25) entsteht eine neue Mappingversion, die tatsächlich normalisiert.

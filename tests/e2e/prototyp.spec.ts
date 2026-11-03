@@ -226,6 +226,19 @@ test.describe.serial('DART 2.0 – vertikale Strecke', () => {
     await page.screenshot({ path: SHOT('18-fall-360'), fullPage: false });
   });
 
+  test('Variablenkatalog V05: 1.441 Katalogzeilen, Filter nach Prüfhinweis, keine Freigaben', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 1100 });
+    await login(page, 'daten');
+    await page.goto('/migration');
+    await expect(page.getByRole('heading', { name: /Variablenkatalog Knie V05/ })).toBeVisible();
+    await expect(page.getByText(/1441 Katalogzeilen/)).toBeVisible();
+    await expect(page.getByText(/eingetragene Freigaben: 0/)).toBeVisible();
+    await page.getByRole('button', { name: /VARID im Blatt mehrfach \(10\)/ }).click();
+    await expect(page.getByText('10 Einträge')).toBeVisible();
+    await page.locator('#h-kat').scrollIntoViewIfNeeded();
+    await page.screenshot({ path: SHOT('19-variablenkatalog'), fullPage: false });
+  });
+
   test('Tastaturbedienung: sichtbarer Fokus und Sprunglink', async ({ page }) => {
     await page.goto('/anmelden');
     await expect(page.locator('button[data-user]').first()).toBeVisible();
