@@ -5,6 +5,7 @@ import { api, ApiErr } from '@/lib/api';
 import { CASE_STATUS_LABEL, fmtDate, JOINT_LABEL } from '@/lib/format';
 import { can, useMe } from '@/lib/session';
 import { Alert, Badge, ConceptNote, ConsentBadge, ErrorBox, Loading } from '@/components/ui';
+import { DateInput } from '@/components/DateInput';
 
 interface Tasks { stichtag: string; patients: number; cases: number; consentMissing: number; evidenceToReview: number; physicianFormsOpen: number; followUpsDue: number; overdue: number }
 interface CaseItem { id: string; case_no: string; center_name: string; pseudonym: string; joint: string; side: string; treatment_type: string; planned_op_date: string | null; actual_op_date: string | null; conservative_start_date: string | null; status: string; mode: string; registers: string[]; modules: string[]; open_physician_forms: number; consent_status: string | null; surgeon_name: string | null }
@@ -99,8 +100,8 @@ export default function Dashboard() {
           <div className="field"><label htmlFor="m">Modus</label><select id="m" value={f.mode} onChange={(e) => set({ mode: e.target.value })}><option value="">Alle</option><option value="basic">DART Basic</option><option value="science">DART Science</option></select></div>
           <div className="field"><label htmlFor="mo">Modul/Eingriff</label><select id="mo" value={f.module} onChange={(e) => set({ module: e.target.value })}><option value="">Alle</option>{Object.entries(MODULE_LABEL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select></div>
           <div className="field"><label htmlFor="s">Status</label><select id="s" value={f.status} onChange={(e) => set({ status: e.target.value })}><option value="">Alle</option><option value="consent_ausstehend">Einwilligung ausstehend</option><option value="aktiv">Aktiv</option><option value="arztbogen_offen">Arztbogen offen</option><option value="ueberfaellig">Befragung überfällig</option><option value="gesperrt">Gesperrt</option></select></div>
-          <div className="field"><label htmlFor="from">Bezugsdatum von</label><input id="from" type="date" value={f.from} onChange={(e) => set({ from: e.target.value })} /></div>
-          <div className="field"><label htmlFor="to">Bezugsdatum bis</label><input id="to" type="date" value={f.to} onChange={(e) => set({ to: e.target.value })} /></div>
+          <div className="field"><label htmlFor="from">Bezugsdatum von</label><DateInput id="from" value={f.from} onChange={(iso) => set({ from: iso })} /></div>
+          <div className="field"><label htmlFor="to">Bezugsdatum bis</label><DateInput id="to" value={f.to} onChange={(iso) => set({ to: iso })} /></div>
           <div className="field" style={{ alignSelf: 'end' }}><button type="button" className="btn-ghost" onClick={() => setF({ q: '', centerId: '', surgeonId: '', register: '', mode: '', status: '', module: '', from: '', to: '', page: 1 })}>Filter zurücksetzen</button></div>
         </form>
       </section>

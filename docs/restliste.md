@@ -23,7 +23,7 @@ P1 = vor Pilot-MVP erforderlich, P2 = Ausbau. Fachliche Freigaben stehen in `doc
 | R-17 | P1 | Migration | Originalexporte verschlüsselt ablegen, freigegebene Mappings (Katalog V05 liegt vor), zwei Probeläufe, Cutover-Plan (E-11, E-12) |
 | R-18 | P1 | Barrierefreiheit | Vollständiger WCAG-2.2-AA-Audit inkl. Screenreader (NVDA/VoiceOver) |
 | R-19 | P1 | Betroffenenrechte | Bearbeitungsoberfläche für Auskunft/Berichtigung/Einschränkung/Löschung mit Fristen |
-| R-20 | P1 | Datumseingabe | Eigene deutschsprachige Datumseingabe (TT.MM.JJJJ) unabhängig von der Browsersprache |
+| R-20 | – | Datumseingabe | **Erledigt** (03.11.2026): `DateInput` mit TT.MM.JJJJ, Prüfung auf Kalendergültigkeit und Grenzen, feldnahe Fehler |
 | R-21 | P2 | Weitere Gelenke | Schulter, Hüfte, Sprunggelenk (Datenmodell vorbereitet, in der Anlage deaktiviert) |
 | R-22 | P1 | CI | GitHub-Workflow ist angelegt, in dieser Umgebung aber nicht ausgeführt; im Ziel-Repository aktivieren und prüfen |
 | R-23 | P1 | Penetrationstest | Externer Test vor Produktivfreigabe |

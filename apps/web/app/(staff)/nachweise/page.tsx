@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { api, ApiErr } from '@/lib/api';
 import { fmtDateTime, todayIso } from '@/lib/format';
 import { Alert, ConceptNote, ErrorBox, Loading } from '@/components/ui';
+import { DateInput } from '@/components/DateInput';
 
 const CHECKS: Array<[string, string]> = [
   ['richtige_person', 'Dokument gehört zur richtigen Person'],
@@ -43,7 +44,7 @@ function Review({ item, onDone, onError }: { item: any; onDone: (m: string) => v
         {CHECKS.map(([k, l]) => <label key={k} className="choice"><input type="checkbox" checked={!!chk[k]} onChange={(e) => setChk({ ...chk, [k]: e.target.checked })} />{l}</label>)}
       </fieldset>
       <div className="grid grid-2">
-        <div className="field"><label htmlFor={`sd-${item.id}`}>Unterschriftsdatum laut Dokument</label><input id={`sd-${item.id}`} type="date" max={todayIso()} value={signedDate} onChange={(e) => setSignedDate(e.target.value)} /></div>
+        <div className="field"><label htmlFor={`sd-${item.id}`}>Unterschriftsdatum laut Dokument</label><DateInput id={`sd-${item.id}`} max={todayIso()} value={signedDate} onChange={(iso) => setSignedDate(iso)} /></div>
         <div className="field"><label htmlFor={`rr-${item.id}`}>Ablehnungsgrund (bei Ablehnung)</label><input id={`rr-${item.id}`} type="text" value={reason} onChange={(e) => setReason(e.target.value)} /></div>
       </div>
       <div className="row">

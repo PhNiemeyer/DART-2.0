@@ -45,7 +45,7 @@ danach vier aufeinanderfolgende Läufe ohne Fehler.
 - **Penetrationstest** – nicht durchgeführt.
 - **Produktiver Malwarescanner** – nur Demo-Adapter (EICAR).
 - **Migration echter Bestände** – Q02/Q03 liegen vor und sind geprüft; echte Patientenexporte liegen nicht vor. Migrationstests mit synthetischen Werten (auch mit echten V05-Spaltennamen).
-- Datumsfelder zeigen im Headless-Browser das US-Format des Browser-UI (`mm/dd/yyyy`); deutsche Browser zeigen TT.MM.JJJJ. Alle Datumsangaben im Text werden als TT.MM.JJJJ formatiert.
+- Datumsfelder: seit 03.11.2026 eigene Eingabe TT.MM.JJJJ unabhängig von der Browsersprache (R-20), geprüft per Unit-Tests (Schaltjahr, 31.04., zweistellige Jahre) und E2E (31.02.2026 wird abgelehnt).
 
 ## Testumgebung reproduzieren
 
