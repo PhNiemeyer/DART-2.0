@@ -79,4 +79,3 @@ jobs:
           pnpm test:e2e
       - name: Sicherheitsprüfung Abhängigkeiten
         run: pnpm audit --prod --audit-level high
-        continue-on-error: true
