@@ -97,6 +97,11 @@ export interface ComputeSpec {
   algorithm: string;
   /** Eingangsvariablen (Item-IDs). */
   inputs: string[];
+  /**
+   * Optionale Umrechnung je Eingang auf einen Itemwert 0 … (max − min):
+   * normal: Wert − min; reverse: max − Wert. Ohne Angabe wird der Rohwert verwendet.
+   */
+  transforms?: Record<string, { min: number; max: number; reverse?: boolean }>;
 }
 
 export interface FormItem {

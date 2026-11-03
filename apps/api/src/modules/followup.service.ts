@@ -100,9 +100,10 @@ export class FollowUpService {
     return missing;
   }
 
-  async ensurePatientForm(c: Tx, cs: CaseRow, eventId: string, timepoint: string): Promise<string | null> {
+  /** Legt alle Patientenbögen des Ereignisses an (z. B. Demonstrationsbogen, IKDC, KOOS) und liefert ihre IDs. */
+  async ensurePatientForm(c: Tx, cs: CaseRow, eventId: string, timepoint: string): Promise<string[]> {
     const qs = resolveQuestionnaires({ joint: cs.joint, mode: cs.mode, treatment: cs.treatment_type, registers: cs.registers, modules: cs.modules }, 'patient', timepoint === 'BL' ? 'BL' : 'FU');
-    let id: string | null = null;
+    const ids: string[] = [];
     for (const q of qs) {
       const vid = await publishedVersionId(c, q.questionnaire);
       if (!vid) continue;
@@ -112,9 +113,9 @@ export class FollowUpService {
          RETURNING id`,
         [cs.center_id, cs.id, eventId, vid, q.module],
       );
-      id ??= rows[0].id;
+      ids.push(rows[0].id);
     }
-    return id;
+    return ids;
   }
 
   /**

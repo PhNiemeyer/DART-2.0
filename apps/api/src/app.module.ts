@@ -7,6 +7,7 @@ import { AllExceptionsFilter } from './core/errors';
 import { Idempotency, RequestContextMiddleware } from './core/http';
 import { VaultClient } from './core/vault-client';
 import { AdminController, AuthController, MetaController } from './modules/admin';
+import { AutoReportController } from './modules/autoreport';
 import { CasesController } from './modules/cases';
 import { ConsentController, ConsentService } from './modules/consent';
 import { FollowUpService } from './modules/followup.service';
@@ -30,6 +31,7 @@ import { ResponsesController, ResponsesService } from './modules/responses';
     FormsController,
     PortalController,
     ReportsController,
+    AutoReportController,
     ExportsController,
     MigrationController,
   ],

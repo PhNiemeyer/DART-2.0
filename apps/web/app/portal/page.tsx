@@ -145,6 +145,7 @@ export default function Portal() {
                   <span className="row">
                     <EventBadge status={e.status} />
                     {e.open && e.responseId && <Link className="btn btn-small" href={`/portal/befragung/${e.responseId}`}>{e.status === 'begonnen' ? 'Fortsetzen' : 'Starten'}</Link>}
+                    {e.open && (e.forms ?? []).length > 1 && <span className="small muted">{e.forms.filter((x: any) => x.status === 'abgeschlossen').length} von {e.forms.length} Bögen erledigt</span>}
                   </span>
                 </li>
               ))}

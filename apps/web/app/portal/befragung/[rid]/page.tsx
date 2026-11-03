@@ -22,7 +22,7 @@ export default function Survey() {
   const pct = ev.progress.total ? Math.round((ev.progress.answered / ev.progress.total) * 100) : 100;
   if (r.status === 'abgeschlossen') return (
     <>
-      <Alert kind="success" title="Vielen Dank!">Ihre Antworten wurden gespeichert.</Alert>
+      <Alert kind="success" title="Vielen Dank!">Ihre Antworten wurden gespeichert. Weitere offene Bögen dieser Befragung finden Sie in der Übersicht.</Alert>
       <Link className="btn" href="/portal">Zur Übersicht</Link>
     </>
   );

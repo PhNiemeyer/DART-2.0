@@ -325,13 +325,19 @@ export function evaluateForm(schema: FormSchema, data: ResponseData): FormEvalua
     if (scoreCache.has(key)) return scoreCache.get(key)!;
     const alg = getScoreAlgorithm(item.compute!.algorithm);
     const resolver = makeResolver(group, instanceId);
+    const tf = item.compute!.transforms ?? {};
+    const maxima: Array<number | undefined> = [];
     const values = item.compute!.inputs.map((inp) => {
       const raw = resolver(inp);
-      if (typeof raw === 'number') return raw;
-      if (typeof raw === 'string' && raw.trim() !== '' && !Number.isNaN(Number(raw))) return Number(raw);
-      return undefined;
+      let n: number | undefined;
+      if (typeof raw === 'number') n = raw;
+      else if (typeof raw === 'string' && raw.trim() !== '' && !Number.isNaN(Number(raw))) n = Number(raw);
+      const t = tf[inp];
+      maxima.push(t ? t.max - t.min : undefined);
+      if (n === undefined || !t) return n;
+      return t.reverse ? t.max - n : n - t.min;
     });
-    const res = alg ? alg.compute(values) : { value: null, reason: 'Unbekannter Algorithmus', usedInputs: 0, totalInputs: values.length };
+    const res = alg ? alg.compute(values, maxima) : { value: null, reason: 'Unbekannter Algorithmus', usedInputs: 0, totalInputs: values.length };
     const out: ScoreOutcome = { key, itemId: item.id, algorithm: item.compute!.algorithm, ...res };
     scoreCache.set(key, out);
     return out;

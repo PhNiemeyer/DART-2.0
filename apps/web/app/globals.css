@@ -180,3 +180,10 @@ main { overflow-wrap: anywhere; }
 table.data th, table.data td { overflow-wrap: normal; word-break: normal; }
 table.data td code { overflow-wrap: anywhere; }
 table.data .nowrap { white-space: nowrap; }
+@media print {
+  .topbar, .sidenav, .no-print, .skip-link { display: none !important; }
+  .layout { display: block; }
+  main { padding: 0; }
+  .card { break-inside: avoid; border-color: #999; }
+  body { background: #fff; }
+}

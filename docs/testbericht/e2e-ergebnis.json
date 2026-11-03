@@ -101,7 +101,7 @@
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-11-02T22:39:39.104Z",
+                  "startTime": "2026-11-03T17:57:06.381Z",
                   "annotations": [
                     {
                       "type": "skip",
@@ -164,12 +164,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 1206,
+                      "duration": 595,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-11-02T22:39:39.958Z",
+                      "startTime": "2026-11-03T17:57:06.756Z",
                       "annotations": [
                         {
                           "type": "serial",
@@ -216,12 +216,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 2107,
+                      "duration": 1469,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-11-02T22:39:41.506Z",
+                      "startTime": "2026-11-03T17:57:07.462Z",
                       "annotations": [
                         {
                           "type": "serial",
@@ -268,12 +268,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 2589,
+                      "duration": 2762,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-11-02T22:39:43.639Z",
+                      "startTime": "2026-11-03T17:57:08.948Z",
                       "annotations": [
                         {
                           "type": "serial",
@@ -292,7 +292,7 @@
               ],
               "id": "df147c69ada47a973bc0-77cdd162c496ad86c20d",
               "file": "prototyp.spec.ts",
-              "line": 101,
+              "line": 110,
               "column": 7
             },
             {
@@ -320,12 +320,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 5890,
+                      "duration": 5221,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-11-02T22:39:46.241Z",
+                      "startTime": "2026-11-03T17:57:11.722Z",
                       "annotations": [
                         {
                           "type": "serial",
@@ -344,7 +344,7 @@
               ],
               "id": "df147c69ada47a973bc0-00a2f40b802c27e35262",
               "file": "prototyp.spec.ts",
-              "line": 137,
+              "line": 146,
               "column": 7
             },
             {
@@ -372,12 +372,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 767,
+                      "duration": 589,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-11-02T22:39:52.143Z",
+                      "startTime": "2026-11-03T17:57:16.955Z",
                       "annotations": [
                         {
                           "type": "serial",
@@ -396,7 +396,7 @@
               ],
               "id": "df147c69ada47a973bc0-8f6d6b16db1e15957fce",
               "file": "prototyp.spec.ts",
-              "line": 180,
+              "line": 189,
               "column": 7
             },
             {
@@ -424,12 +424,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 1672,
+                      "duration": 1365,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-11-02T22:39:52.929Z",
+                      "startTime": "2026-11-03T17:57:17.557Z",
                       "annotations": [
                         {
                           "type": "serial",
@@ -448,7 +448,7 @@
               ],
               "id": "df147c69ada47a973bc0-726210dd35fccbc0efe3",
               "file": "prototyp.spec.ts",
-              "line": 189,
+              "line": 198,
               "column": 7
             },
             {
@@ -476,12 +476,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 1100,
+                      "duration": 859,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-11-02T22:39:54.621Z",
+                      "startTime": "2026-11-03T17:57:18.933Z",
                       "annotations": [
                         {
                           "type": "serial",
@@ -500,7 +500,111 @@
               ],
               "id": "df147c69ada47a973bc0-ad65f92965f145850fd3",
               "file": "prototyp.spec.ts",
-              "line": 214,
+              "line": 223,
+              "column": 7
+            },
+            {
+              "title": "Variablenkatalog V05: 1.441 Katalogzeilen, Filter nach Prüfhinweis, keine Freigaben",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [
+                    {
+                      "type": "serial",
+                      "location": {
+                        "file": "/home/user/dart-2.0/tests/e2e/prototyp.spec.ts",
+                        "line": 51,
+                        "column": 15
+                      }
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1006,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-03T17:57:19.806Z",
+                      "annotations": [
+                        {
+                          "type": "serial",
+                          "location": {
+                            "file": "/home/user/dart-2.0/tests/e2e/prototyp.spec.ts",
+                            "line": 51,
+                            "column": 15
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "df147c69ada47a973bc0-e5f19db62ff655b5695d",
+              "file": "prototyp.spec.ts",
+              "line": 238,
+              "column": 7
+            },
+            {
+              "title": "Autoreport: eigene Daten vs. Gesamtkollektiv mit Kennzeichnung der Abweichung",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [
+                    {
+                      "type": "serial",
+                      "location": {
+                        "file": "/home/user/dart-2.0/tests/e2e/prototyp.spec.ts",
+                        "line": 51,
+                        "column": 15
+                      }
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1057,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-03T17:57:20.826Z",
+                      "annotations": [
+                        {
+                          "type": "serial",
+                          "location": {
+                            "file": "/home/user/dart-2.0/tests/e2e/prototyp.spec.ts",
+                            "line": 51,
+                            "column": 15
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "df147c69ada47a973bc0-5ef5048636e161c6ff74",
+              "file": "prototyp.spec.ts",
+              "line": 251,
               "column": 7
             },
             {
@@ -528,12 +632,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 270,
+                      "duration": 215,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-11-02T22:39:55.734Z",
+                      "startTime": "2026-11-03T17:57:21.892Z",
                       "annotations": [
                         {
                           "type": "serial",
@@ -552,7 +656,7 @@
               ],
               "id": "df147c69ada47a973bc0-e2d5e2549a7947219401",
               "file": "prototyp.spec.ts",
-              "line": 229,
+              "line": 266,
               "column": 7
             },
             {
@@ -580,12 +684,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 43,
+                      "duration": 35,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-11-02T22:39:56.021Z",
+                      "startTime": "2026-11-03T17:57:22.118Z",
                       "annotations": [
                         {
                           "type": "serial",
@@ -604,7 +708,7 @@
               ],
               "id": "df147c69ada47a973bc0-19dc5ec30075ed2fe9b2",
               "file": "prototyp.spec.ts",
-              "line": 240,
+              "line": 277,
               "column": 7
             }
           ]
@@ -614,9 +718,9 @@
   ],
   "errors": [],
   "stats": {
-    "startTime": "2026-11-02T22:39:39.040Z",
-    "duration": 17081.849,
-    "expected": 9,
+    "startTime": "2026-11-03T17:57:06.342Z",
+    "duration": 15892.751000000002,
+    "expected": 11,
     "skipped": 1,
     "unexpected": 0,
     "flaky": 0

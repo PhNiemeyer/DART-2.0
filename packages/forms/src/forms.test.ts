@@ -149,3 +149,37 @@ describe('Deutsche Datumseingabe', () => {
     expect(formatGermanDate(null)).toBe('');
   });
 });
+
+import { IKDC_V1, KOOS_SUBSCALES } from './index';
+describe('IKDC und KOOS (Scoring, Freigabe ausstehend)', () => {
+  const maxIkdc = [4, 10, 10, 4, 4, 1, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 10];
+  it('IKDC: Maximalsumme 87; bestes Ergebnis 100, schlechtestes 0, Teilantworten auf beantwortete Items bezogen', () => {
+    expect(maxIkdc.reduce((a, b) => a + b, 0)).toBe(87);
+    expect(IKDC_V1.compute(maxIkdc, maxIkdc).value).toBe(100);
+    expect(IKDC_V1.compute(maxIkdc.map(() => 0), maxIkdc).value).toBe(0);
+    const half = maxIkdc.map((m) => m / 2);
+    expect(IKDC_V1.compute(half, maxIkdc).value).toBe(50);
+    const twoMissing = [...maxIkdc.slice(0, 16), undefined, undefined];
+    expect(IKDC_V1.compute(twoMissing, maxIkdc).value).toBe(100);
+    const threeMissing = [...maxIkdc.slice(0, 15), undefined, undefined, undefined];
+    expect(IKDC_V1.compute(threeMissing, maxIkdc).value).toBeNull();
+  });
+  it('KOOS: 0 = keine Beschwerden → 100; 4 → 0; Mittelwert 1 → 75; < 50 % Angaben → kein Wert', () => {
+    const s = KOOS_SUBSCALES['KOOS-QOL@1'];
+    expect(s.compute([0, 0, 0, 0]).value).toBe(100);
+    expect(s.compute([4, 4, 4, 4]).value).toBe(0);
+    expect(s.compute([1, 1, 1, 1]).value).toBe(75);
+    expect(s.compute([2, 1, undefined, undefined]).value).toBe(62.5);
+    expect(s.compute([2, undefined, undefined, undefined]).value).toBeNull();
+  });
+  it('Umrechnung im Formular: umgekehrte Items (z. B. KOOS S4) und Verschiebung (IKDC 1–5 → 0–4)', () => {
+    const schema: FormSchema = { schemaVersion: 1, code: 'T3', title: 'T', audience: 'patient', module: 'B', sections: [{ id: 's', title: 'S', items: [
+      { id: 'a', varId: 'A', label: 'A', type: 'single', codes: ['0', '1', '2', '3', '4'].map((c) => ({ code: c, label: c })) },
+      { id: 'b', varId: 'B', label: 'B', type: 'single', codes: ['0', '1', '2', '3', '4'].map((c) => ({ code: c, label: c })) },
+      { id: 'k', varId: 'K', label: 'K', type: 'computed', compute: { algorithm: 'KOOS-SYMPTOME@1', inputs: ['a', 'b'], transforms: { b: { min: 0, max: 4, reverse: true } } } },
+    ] }] };
+    expect(validateSchema(schema)).toEqual([]);
+    // a = 0 (keine Beschwerden), b = 4 („immer ganz strecken“ = gut) → umgekehrt 0 → 100
+    expect(evaluateForm(schema, { answers: { a: { value: '0' }, b: { value: '4' } }, instances: {} }).scores[0].value).toBe(100);
+  });
+});

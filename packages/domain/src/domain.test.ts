@@ -139,6 +139,27 @@ describe('Migration (synthetisch)', () => {
   });
 });
 
+import { ageGroup, compare, tQuantile975 } from './index';
+describe('Autoreport-Hilfen', () => {
+  it('Altersgruppen zum Bezugsdatum', () => {
+    expect(ageGroup('1980-06-15', '2026-06-14')).toBe('45–49');
+    expect(ageGroup('1980-06-15', '2026-06-15')).toBe('45–49');
+    expect(ageGroup('1981-06-16', '2026-06-15')).toBe('40–44');
+    expect(ageGroup('2010-01-01', '2026-01-01')).toBe('<18');
+    expect(ageGroup('1930-01-01', '2026-01-01')).toBe('85+');
+    expect(ageGroup('x', '2026-01-01')).toBeNull();
+  });
+  it('t-Quantile und Einordnung der Abweichung', () => {
+    expect(tQuantile975(9)).toBeCloseTo(2.262, 3);
+    expect(tQuantile975(1000)).toBeCloseTo(1.962, 2);
+    // n=25, sd=10 → Halbbreite 2,064·2 = 4,13
+    expect(compare({ n: 25, mean: 80, sd: 10 }, { n: 500, mean: 70, sd: 12 })).toMatchObject({ diff: 10, einordnung: 'ueber' });
+    expect(compare({ n: 25, mean: 72, sd: 10 }, { n: 500, mean: 70, sd: 12 }).einordnung).toBe('im_bereich');
+    expect(compare({ n: 25, mean: 60, sd: 10 }, { n: 500, mean: 70, sd: 12 }).einordnung).toBe('unter');
+    expect(compare({ n: 4, mean: 60, sd: 10 }, { n: 500, mean: 70, sd: 12 }).einordnung).toBe('zu_wenige_faelle');
+  });
+});
+
 describe('Katalog-Mapping V05 (ohne Freigabe)', () => {
   const cat = [
     { sheet: 'CA', sourceRow: 2, altName: 'P_ID', sasAlias: 'P_ID', varId: 'CA001', dartId: 'CA001', klasse: 'Überarbeitung', klasseCode: 'B' as const, label: '', vergleichbarkeit: '', basicScience: '', pruefhinweise: [], entscheidung: 'Vorschlag; fachlich offen', freigabeDurch: null, altformat: '', codeliste: '' },

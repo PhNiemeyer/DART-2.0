@@ -56,6 +56,9 @@ Auf `/anmelden` erscheint im Modus `AUTH_MODE=dev` eine Auswahl. Kein Passwort �
 4. Patientenportal: Erstbefragung ausfüllen. Mailpit zeigt die automatische Einladung des Workers (nur mit Kontakt-Einwilligung und E-Mail).
 5. Weitere Rollen: `doku.nord` (Papierupload), `dr.nord` → **Nachweise prüfen**, `redaktion`/`freigabe` → **Formulare**,
    `daten` → **Migration** (synthetische Beispieldatei), `forschung` + `admin` → **Auswertung & Export**.
+6. Als `dr.nord` → **Auswertung & Export** → **Autoreport**: eigene Fälle gegenüber Zentrum und Gesamtkollektiv
+   (IKDC/KOOS nach Pathologie, Eingriff, Modus; Verlauf; Patientencharakteristika). Die 300 synthetischen Demofälle lädt der
+   Migrationsschritt automatisch (`DEMO_DATEN=false` schaltet das ab; in Produktion verweigert).
 
 ### Daten zurücksetzen
 

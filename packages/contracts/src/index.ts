@@ -40,6 +40,7 @@ export const CreatePatientCaseSchema = z.object({
       lastName: z.string().trim().min(1, 'Nachname fehlt').max(100),
       email: z.string().trim().email('Ungültige E-Mail-Adresse').max(200).optional().or(z.literal('')),
       birthDate: isoDate.optional().or(z.literal('')),
+      sex: z.enum(['weiblich', 'maennlich', 'divers', 'unbekannt']).optional(),
     }),
   ]),
   centerId: uuid,

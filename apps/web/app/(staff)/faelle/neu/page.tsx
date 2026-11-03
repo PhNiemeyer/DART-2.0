@@ -28,7 +28,7 @@ function Wizard() {
   const [busy, setBusy] = useState(false);
   const [v, setV] = useState({
     centerId: writeCenters[0]?.id ?? '',
-    firstName: '', lastName: '', email: '', birthDate: '',
+    firstName: '', lastName: '', email: '', birthDate: '', sex: '',
     consentMethod: 'digital_demo' as 'digital_demo' | 'papier_upload',
     documentVersionId: '',
     scopes: [] as string[],
@@ -98,7 +98,7 @@ function Wizard() {
     setError(null);
     try {
       const body = {
-        patient: existingPatient ? { existingPatientId: existingPatient } : { firstName: v.firstName, lastName: v.lastName, email: v.email || undefined, birthDate: v.birthDate || undefined },
+        patient: existingPatient ? { existingPatientId: existingPatient } : { firstName: v.firstName, lastName: v.lastName, email: v.email || undefined, birthDate: v.birthDate || undefined, sex: v.sex || undefined },
         centerId: v.centerId, joint: v.joint, side: v.side, treatmentType: v.treatmentType,
         surgeonUserId: v.surgeonUserId || null,
         plannedOpDate: v.treatmentType === 'operativ' ? v.plannedOpDate || null : null,
@@ -155,7 +155,8 @@ function Wizard() {
                 <div className="field"><label htmlFor="fn">Vorname</label><input id="fn" type="text" autoComplete="off" value={v.firstName} aria-invalid={showErr && !v.firstName.trim()} onChange={(e) => set({ firstName: e.target.value })} /></div>
                 <div className="field"><label htmlFor="ln">Nachname</label><input id="ln" type="text" autoComplete="off" value={v.lastName} aria-invalid={showErr && !v.lastName.trim()} onChange={(e) => set({ lastName: e.target.value })} /></div>
                 <div className="field"><label htmlFor="em">E-Mail für Verlaufsbefragungen (optional)</label><input id="em" type="email" autoComplete="off" value={v.email} onChange={(e) => set({ email: e.target.value })} /><div className="help">Nur mit Einwilligung zur Kontaktaufnahme.</div></div>
-                <div className="field"><label htmlFor="bd">Geburtsdatum (optional)</label><DateInput id="bd" value={v.birthDate} onChange={(iso) => set({ birthDate: iso })} /><div className="help">Nur erfassen, wenn fachlich erforderlich und freigegeben (offene Entscheidung).</div></div>
+                <div className="field"><label htmlFor="bd">Geburtsdatum (optional)</label><DateInput id="bd" value={v.birthDate} onChange={(iso) => set({ birthDate: iso })} /><div className="help">Wird nur im Vault gespeichert; im Forschungskern steht ausschließlich die Altersgruppe (5 Jahre) bei Behandlung.</div></div>
+                <div className="field"><label htmlFor="sx">Geschlecht</label><select id="sx" value={v.sex} onChange={(e) => set({ sex: e.target.value })}><option value="">– bitte wählen –</option><option value="weiblich">weiblich</option><option value="maennlich">männlich</option><option value="divers">divers</option><option value="unbekannt">keine Angabe</option></select><div className="help">Für Patientencharakteristika im Report (pseudonym im Forschungskern).</div></div>
               </div>
               <fieldset>
                 <legend>Weg der Einwilligung</legend>
