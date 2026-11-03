@@ -53,7 +53,7 @@ Alle Umsetzungen sind Prototyp-Stand mit synthetischen Daten; keine Fachfreigabe
 | ID | Umsetzung | Tests | Status |
 |---|---|---|---|
 | U01 Design-Tokens, Schrift selbst gehostet | `globals.css`, `packages/ui` | 12 Kontrastpaare | umgesetzt (Logo nicht geliefert) |
-| U02 WCAG 2.2 AA | Labels, Fokus, Fehlerzusammenfassung, aria-live Autosave, Signatur-Alternative, 360 px | E2E: Labels, Fokus, Sprunglink, 360 px | teilweise (kein vollständiger Screenreader-/Audit-Test, R-18) |
+| U02 WCAG 2.2 AA | Labels, Fokus, Fehlerzusammenfassung, aria-live Autosave, Signatur-Alternative, 360 px, deutsche Datumseingabe TT.MM.JJJJ (`components/DateInput.tsx`) | E2E: Labels, Fokus, Sprunglink, 360 px | teilweise (kein vollständiger Screenreader-/Audit-Test, R-18) |
 | U03 Vier Ansichten + Editor, Zustände | Dashboard, Anlage, Arztbogen, Portal, Editor | E2E 1–9, Screenshots | umgesetzt |
 
 ## Tests T01–T04

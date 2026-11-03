@@ -5,9 +5,11 @@ import { api, ApiErr } from '@/lib/api';
 import { useMe } from '@/lib/session';
 import { stashOnsite } from '@/lib/onsite';
 import { Alert, ConceptNote, ErrorBox } from '@/components/ui';
+import { DateInput } from '@/components/DateInput';
 
 interface Ops { code: string; version: string; concept: string; label: string; module?: string }
-interface Catalog { modules: Array<{ code: string; label: string; suggestsRegister?: string }>; consentScopes: Record<string, string> }
+interface Catalog { modules: Array<{ code: string; label: string; suggestsRegister?: string }>; consentScopes: Record<string, string>; registers: Record<string, string> }
+const REG_SHORT: Record<string, string> = { DART: 'DART', KNORPEL_DGOU: 'KnorpelRegister DGOU', DEKOR: 'DEKOR' };
 interface Doc { id: string; title: string; version: string; scopes: string[] }
 
 function Wizard() {
@@ -153,7 +155,7 @@ function Wizard() {
                 <div className="field"><label htmlFor="fn">Vorname</label><input id="fn" type="text" autoComplete="off" value={v.firstName} aria-invalid={showErr && !v.firstName.trim()} onChange={(e) => set({ firstName: e.target.value })} /></div>
                 <div className="field"><label htmlFor="ln">Nachname</label><input id="ln" type="text" autoComplete="off" value={v.lastName} aria-invalid={showErr && !v.lastName.trim()} onChange={(e) => set({ lastName: e.target.value })} /></div>
                 <div className="field"><label htmlFor="em">E-Mail für Verlaufsbefragungen (optional)</label><input id="em" type="email" autoComplete="off" value={v.email} onChange={(e) => set({ email: e.target.value })} /><div className="help">Nur mit Einwilligung zur Kontaktaufnahme.</div></div>
-                <div className="field"><label htmlFor="bd">Geburtsdatum (optional)</label><input id="bd" type="date" value={v.birthDate} onChange={(e) => set({ birthDate: e.target.value })} /><div className="help">Nur erfassen, wenn fachlich erforderlich und freigegeben (offene Entscheidung).</div></div>
+                <div className="field"><label htmlFor="bd">Geburtsdatum (optional)</label><DateInput id="bd" value={v.birthDate} onChange={(iso) => set({ birthDate: iso })} /><div className="help">Nur erfassen, wenn fachlich erforderlich und freigegeben (offene Entscheidung).</div></div>
               </div>
               <fieldset>
                 <legend>Weg der Einwilligung</legend>
@@ -211,12 +213,12 @@ function Wizard() {
           <div className="grid grid-3">
             {v.treatmentType === 'operativ' ? (
               <>
-                <div className="field"><label htmlFor="pod">Geplantes OP-Datum</label><input id="pod" type="date" value={v.plannedOpDate} onChange={(e) => set({ plannedOpDate: e.target.value })} /></div>
-                <div className="field"><label htmlFor="aod">Tatsächliches OP-Datum (falls erfolgt)</label><input id="aod" type="date" value={v.actualOpDate} onChange={(e) => set({ actualOpDate: e.target.value })} /></div>
+                <div className="field"><label htmlFor="pod">Geplantes OP-Datum</label><DateInput id="pod" value={v.plannedOpDate} onChange={(iso) => set({ plannedOpDate: iso })} /></div>
+                <div className="field"><label htmlFor="aod">Tatsächliches OP-Datum (falls erfolgt)</label><DateInput id="aod" value={v.actualOpDate} onChange={(iso) => set({ actualOpDate: iso })} /></div>
                 <div className="field"><label htmlFor="sur">Operateur/in</label><select id="sur" value={v.surgeonUserId} onChange={(e) => set({ surgeonUserId: e.target.value })}><option value="">– nicht festgelegt –</option>{staff?.surgeons.map((s) => <option key={s.id} value={s.id}>{s.display_name}</option>)}</select></div>
               </>
             ) : (
-              <div className="field"><label htmlFor="csd">Beginn der konservativen Behandlung</label><input id="csd" type="date" value={v.conservativeStartDate} onChange={(e) => set({ conservativeStartDate: e.target.value })} /><div className="help">Eigenes Bezugsdatum – kein fiktives OP-Datum.</div></div>
+              <div className="field"><label htmlFor="csd">Beginn der konservativen Behandlung</label><DateInput id="csd" value={v.conservativeStartDate} onChange={(iso) => set({ conservativeStartDate: iso })} /><div className="help">Eigenes Bezugsdatum – kein fiktives OP-Datum.</div></div>
             )}
           </div>
           <fieldset>
@@ -237,8 +239,8 @@ function Wizard() {
             <strong>Zusammenfassung</strong>
             <ul>
               <li>{existingPatient ? 'Bestehende Person' : `${v.firstName} ${v.lastName}`} · Knie {v.side} · {v.treatmentType === 'operativ' ? 'operativ' : 'konservativ'}</li>
-              <li>Modus: {v.mode === 'science' ? 'DART Science' : 'DART Basic'} · Register: {v.registers.join(', ')}</li>
-              <li>Module: {v.modules.length ? v.modules.join(', ') : 'nur Basis'} · Eingriffe: {v.procedures.length ? v.procedures.map((p) => `${p.code} (${p.concept})`).join(', ') : 'keine'}</li>
+              <li>Modus: {v.mode === 'science' ? 'DART Science' : 'DART Basic'} · Register: {v.registers.map((r) => REG_SHORT[r] ?? r).join(', ')}</li>
+              <li>Module: {v.modules.length ? v.modules.map((m) => catalog?.modules.find((x) => x.code === m)?.label ?? m).join(', ') : 'nur Basis'} · Eingriffe: {v.procedures.length ? v.procedures.map((p) => `${p.code} ${p.label}`).join('; ') : 'keine'}</li>
               {!existingPatient && <li>Einwilligung: {v.consentMethod === 'digital_demo' ? 'digitale Demo-Signatur vor Ort' : 'Papierupload mit Sichtprüfung'} · Umfang: {[...new Set([...scopesNeeded, ...v.scopes])].map((s) => catalog?.consentScopes[s] ?? s).join('; ')}</li>}
             </ul>
           </div>

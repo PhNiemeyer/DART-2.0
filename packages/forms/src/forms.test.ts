@@ -136,3 +136,16 @@ describe('Prüfregeln dürfen das eigene Feld referenzieren', () => {
     expect(validateSchema(s).some((e) => e.message.includes('sich selbst'))).toBe(true);
   });
 });
+
+import { formatGermanDate, parseGermanDate } from './index';
+describe('Deutsche Datumseingabe', () => {
+  it.each([
+    ['01.02.2026', '2026-02-01'], ['1.2.2026', '2026-02-01'], ['01022026', '2026-02-01'], ['2026-02-01', '2026-02-01'],
+    ['29.02.2028', '2028-02-29'], [' 31.12.2026 ', '2026-12-31'], ['', ''],
+  ])('%s → %s', (i, o) => expect(parseGermanDate(i)).toBe(o));
+  it.each(['29.02.2026', '31.04.2026', '1.2.26', '01.13.2026', '00.01.2026', '12/01/2026', 'morgen'])('%s ist ungültig', (i) => expect(parseGermanDate(i)).toBeNull());
+  it('formatiert ISO als TT.MM.JJJJ', () => {
+    expect(formatGermanDate('2026-02-01')).toBe('01.02.2026');
+    expect(formatGermanDate(null)).toBe('');
+  });
+});

@@ -2,6 +2,7 @@
 import { useEffect, useId, useState } from 'react';
 import { answerKey, AnswerValue, FormEvaluation, FormItem, FormSchema, Issue, MISSING_CODES, MissingCode, ResponseData, YESNO_CODES } from '@dart/forms';
 import { fmtNumber, parseGermanNumber } from '@/lib/format';
+import { DateInput } from './DateInput';
 
 interface Props {
   schema: FormSchema;
@@ -126,7 +127,7 @@ function ItemField({ item, k, a, ev, readOnly, showRequired, onChange }: { item:
   } else {
     let input: React.ReactNode;
     if (item.type === 'number') input = <NumberInput id={id} value={typeof val === 'number' ? val : undefined} readOnly={disabled} invalid={errorList.length > 0} describedBy={describedBy} decimals={item.decimals} onCommit={(n) => set(n === null ? null : { value: n })} />;
-    else if (item.type === 'date') input = <input id={id} type="date" value={typeof val === 'string' ? val : ''} readOnly={disabled} aria-invalid={errorList.length > 0} aria-describedby={describedBy} onChange={(e) => set(e.target.value ? { value: e.target.value } : null)} />;
+    else if (item.type === 'date') input = <DateInput id={id} value={typeof val === 'string' ? val : ''} readOnly={disabled} aria-invalid={errorList.length > 0} aria-describedby={describedBy} onChange={(iso) => set(iso ? { value: iso } : null)} />;
     else input = <textarea id={id} value={typeof val === 'string' ? val : ''} readOnly={disabled} rows={2} aria-invalid={errorList.length > 0} aria-describedby={describedBy} onChange={(e) => set(e.target.value ? { value: e.target.value } : null)} />;
     control = (
       <>

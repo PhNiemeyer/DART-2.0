@@ -4,6 +4,7 @@ import { api, ApiErr } from '@/lib/api';
 import { fmtDate, fmtDateTime } from '@/lib/format';
 import { can, useMe } from '@/lib/session';
 import { Alert, Badge, ConceptNote, ErrorBox, Loading } from '@/components/ui';
+import { DateInput } from '@/components/DateInput';
 
 const TP: Record<string, string> = { BL: 'Baseline', M6: '6 Monate', M12: '12 Monate', M24: '24 Monate', M36: '36 Monate', M60: '60 Monate', M120: '120 Monate' };
 const ST: Record<string, string> = { beantragt: 'beantragt', genehmigt: 'genehmigt', abgelehnt: 'abgelehnt', in_arbeit: 'in Arbeit', fertig: 'fertig', fehler: 'Fehler' };
@@ -43,8 +44,8 @@ export default function Reports() {
           <h2 id="h-rep">Zentrumsbericht</h2>
           <form className="grid grid-3" onSubmit={(e) => e.preventDefault()}>
             {me.centers.length > 1 && <div className="field"><label htmlFor="rc">Zentrum</label><select id="rc" value={f.centerId} onChange={(e) => setF({ ...f, centerId: e.target.value })}><option value="">Alle eigenen</option>{me.centers.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}</select></div>}
-            <div className="field"><label htmlFor="rf">Bezugsdatum von</label><input id="rf" type="date" value={f.from} onChange={(e) => setF({ ...f, from: e.target.value })} /></div>
-            <div className="field"><label htmlFor="rt">bis</label><input id="rt" type="date" value={f.to} onChange={(e) => setF({ ...f, to: e.target.value })} /></div>
+            <div className="field"><label htmlFor="rf">Bezugsdatum von</label><DateInput id="rf" value={f.from} onChange={(iso) => setF({ ...f, from: iso })} /></div>
+            <div className="field"><label htmlFor="rt">bis</label><DateInput id="rt" value={f.to} onChange={(iso) => setF({ ...f, to: iso })} /></div>
           </form>
           {!rep ? <Loading what="Bericht" /> : (
             <>
@@ -76,8 +77,8 @@ export default function Reports() {
             <div className="field" style={{ gridColumn: '1 / -1' }}><label htmlFor="ep">Zweck</label><textarea id="ep" value={req.purpose} onChange={(e) => setReq({ ...req, purpose: e.target.value })} /></div>
             <div className="field"><label htmlFor="es">Umfang</label><select id="es" value={req.scope} onChange={(e) => setReq({ ...req, scope: e.target.value })}><option value="basic">Basic (Registerumfang)</option><option value="science">Science (nur Science-Fälle mit Science-Einwilligung)</option></select></div>
             <fieldset><legend>Ebenen</legend>{['normalisiert', 'scores'].map((l) => <label key={l} className="choice"><input type="checkbox" checked={req.layers.includes(l)} onChange={(e) => setReq({ ...req, layers: e.target.checked ? [...req.layers, l] : req.layers.filter((x) => x !== l) })} />{l === 'normalisiert' ? 'Normalisierte Antworten' : 'Abgeleitete Scores'}</label>)}</fieldset>
-            <div className="field"><label htmlFor="ef">Zeitraum von</label><input id="ef" type="date" value={req.periodFrom} onChange={(e) => setReq({ ...req, periodFrom: e.target.value })} /></div>
-            <div className="field"><label htmlFor="et">bis</label><input id="et" type="date" value={req.periodTo} onChange={(e) => setReq({ ...req, periodTo: e.target.value })} /></div>
+            <div className="field"><label htmlFor="ef">Zeitraum von</label><DateInput id="ef" value={req.periodFrom} onChange={(iso) => setReq({ ...req, periodFrom: iso })} /></div>
+            <div className="field"><label htmlFor="et">bis</label><DateInput id="et" value={req.periodTo} onChange={(iso) => setReq({ ...req, periodTo: iso })} /></div>
             <div><button type="submit" disabled={req.purpose.trim().length < 10 || req.layers.length === 0}>Beantragen</button></div>
           </form>
         </section>

@@ -6,6 +6,7 @@ import { api, ApiErr, fileToBase64 } from '@/lib/api';
 import { CASE_STATUS_LABEL, fmtDate, fmtDateTime, JOINT_LABEL, OUTBOX_STATUS_LABEL, RESPONSE_STATUS_LABEL } from '@/lib/format';
 import { Onsite, takeOnsite } from '@/lib/onsite';
 import { Alert, Badge, ConceptNote, ConsentBadge, ErrorBox, EventBadge, Loading } from '@/components/ui';
+import { DateInput } from '@/components/DateInput';
 
 const TP: Record<string, string> = { BL: 'Baseline', M6: '6 Monate', M12: '12 Monate', M24: '24 Monate', M36: '36 Monate', M60: '60 Monate', M120: '120 Monate', FU3: 'FU3 (historisch)' };
 const MOD: Record<string, string> = { BASIS: 'Basis', MENISKUS: 'Meniskus', KREUZBAND: 'VKB/HKB', PATELLA: 'Patella', KNORPEL: 'Knorpel', OSTEOTOMIE: 'Osteotomie', ENDOPROTHETIK: 'Endoprothetik', SYNOVITIS: 'Synovitis', PATELLASEHNE_KONS: 'Patellasehne kons.' };
@@ -254,10 +255,10 @@ function DateCorrection({ c, onDone, onError }: any) {
     <form className="grid" style={{ marginTop: 8 }} onSubmit={(e) => { e.preventDefault(); api(`/cases/${c.id}/dates`, { body: { plannedOpDate: v.plannedOpDate || null, actualOpDate: v.actualOpDate || null, conservativeStartDate: v.conservativeStartDate || null, reason: v.reason, revision: c.revision } }).then(onDone).catch(onError); }}>
       {c.treatment_type === 'operativ' ? (
         <>
-          <div className="field"><label htmlFor="dc1">Geplantes OP-Datum</label><input id="dc1" type="date" value={v.plannedOpDate} onChange={(e) => setV({ ...v, plannedOpDate: e.target.value })} /></div>
-          <div className="field"><label htmlFor="dc2">Tatsächliches OP-Datum</label><input id="dc2" type="date" value={v.actualOpDate} onChange={(e) => setV({ ...v, actualOpDate: e.target.value })} /></div>
+          <div className="field"><label htmlFor="dc1">Geplantes OP-Datum</label><DateInput id="dc1" value={v.plannedOpDate} onChange={(iso) => setV({ ...v, plannedOpDate: iso })} /></div>
+          <div className="field"><label htmlFor="dc2">Tatsächliches OP-Datum</label><DateInput id="dc2" value={v.actualOpDate} onChange={(iso) => setV({ ...v, actualOpDate: iso })} /></div>
         </>
-      ) : <div className="field"><label htmlFor="dc3">Behandlungsbeginn</label><input id="dc3" type="date" value={v.conservativeStartDate} onChange={(e) => setV({ ...v, conservativeStartDate: e.target.value })} /></div>}
+      ) : <div className="field"><label htmlFor="dc3">Behandlungsbeginn</label><DateInput id="dc3" value={v.conservativeStartDate} onChange={(iso) => setV({ ...v, conservativeStartDate: iso })} /></div>}
       <div className="field"><label htmlFor="dc4">Begründung (Pflicht)</label><input id="dc4" type="text" value={v.reason} onChange={(e) => setV({ ...v, reason: e.target.value })} /></div>
       <button type="submit" className="btn-secondary" disabled={v.reason.trim().length < 5}>Korrektur speichern</button>
     </form>

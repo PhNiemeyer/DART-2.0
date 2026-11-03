@@ -82,7 +82,16 @@ test.describe.serial('DART 2.0 – vertikale Strecke', () => {
     await expect(page.getByLabel('Osteotomie', { exact: true })).toBeChecked();
     await page.screenshot({ path: SHOT('03-anlage-schritt2') });
     await page.getByRole('button', { name: 'Weiter' }).click();
-    await page.getByLabel('Geplantes OP-Datum').fill(new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Berlin' }).format(new Date()));
+    // Deutsche Datumseingabe unabhängig von der Browsersprache (R-20)
+    const op = page.getByLabel('Geplantes OP-Datum');
+    await expect(op).toHaveAttribute('placeholder', 'TT.MM.JJJJ');
+    await op.fill('31.02.2026');
+    await op.blur();
+    await expect(page.getByText('Bitte ein gültiges Datum im Format TT.MM.JJJJ eingeben.')).toBeVisible();
+    const [y, m, d] = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Berlin' }).format(new Date()).split('-');
+    await op.fill(`${d}.${m}.${y}`);
+    await op.blur();
+    await expect(page.getByText('Bitte ein gültiges Datum im Format TT.MM.JJJJ eingeben.')).toHaveCount(0);
     await page.getByLabel('DART Science').check();
     await expect(page.getByLabel('KnorpelRegister DGOU')).toBeChecked();
     await expect(page.getByLabel('DEKOR', { exact: true })).toBeChecked();
