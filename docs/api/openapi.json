@@ -1106,6 +1106,20 @@
         ]
       }
     },
+    "/api/v1/portal/email-reminders": {
+      "post": {
+        "operationId": "PortalController_emailReminders",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Patientenportal"
+        ]
+      }
+    },
     "/api/v1/portal/consents/{id}/sign": {
       "post": {
         "operationId": "PortalController_sign",
@@ -1560,6 +1574,170 @@
         },
         "tags": [
           "Migration"
+        ]
+      }
+    },
+    "/api/v1/dispatch/summary": {
+      "get": {
+        "operationId": "DispatchController_summary",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Versand"
+        ]
+      }
+    },
+    "/api/v1/dispatch": {
+      "get": {
+        "operationId": "DispatchController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Versand"
+        ]
+      }
+    },
+    "/api/v1/dispatch/{id}": {
+      "get": {
+        "operationId": "DispatchController_detail",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Versand"
+        ]
+      }
+    },
+    "/api/v1/dispatch/{id}/requeue": {
+      "post": {
+        "operationId": "DispatchController_requeue",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Versand"
+        ]
+      }
+    },
+    "/api/v1/dispatch/{id}/cancel": {
+      "post": {
+        "operationId": "DispatchController_cancel",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Versand"
+        ]
+      }
+    },
+    "/api/v1/dispatch/{id}/reconcile": {
+      "post": {
+        "operationId": "DispatchController_reconcile",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Versand"
+        ]
+      }
+    },
+    "/api/v1/cases/{caseId}/contact-preference": {
+      "get": {
+        "operationId": "ContactPreferenceController_get",
+        "parameters": [
+          {
+            "name": "caseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Versand"
+        ]
+      },
+      "put": {
+        "operationId": "ContactPreferenceController_put",
+        "parameters": [
+          {
+            "name": "caseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Versand"
         ]
       }
     }

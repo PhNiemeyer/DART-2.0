@@ -12,7 +12,7 @@ import { runOnce, WorkerDeps } from '../src/outbox';
 let pool: Pool;
 let owner: Pool;
 
-function fakeProvider(mode: { timeoutOnFirst?: boolean; refuse?: boolean }) {
+function fakeProvider(mode: { timeoutOnFirst?: boolean; refuse?: boolean; rejectRecipient?: boolean }) {
   const delivered: OutgoingMail[] = [];
   let calls = 0;
   const p: MailProvider & { delivered: OutgoingMail[]; calls: () => number } = {
@@ -22,6 +22,7 @@ function fakeProvider(mode: { timeoutOnFirst?: boolean; refuse?: boolean }) {
     async send(m) {
       calls++;
       if (mode.refuse) throw new SendError('abgelehnt', 'ECONNREFUSED');
+      if (mode.rejectRecipient) throw new SendError('empfaenger', '550');
       delivered.push(m);
       if (mode.timeoutOnFirst && calls === 1) throw new SendError('unklar', 'ETIMEDOUT');
       return { providerId: `fake-${delivered.length}` };
@@ -119,6 +120,41 @@ describe('T02-10 Versand-Retry', () => {
     const r = await runOnce(deps(mail));
     expect(r.storniert).toBeGreaterThanOrEqual(1);
     expect(mail.delivered).toHaveLength(0);
+  });
+});
+
+describe('Versand-Leitstand (R-14) im Worker', () => {
+  const blInvite = `case_id = $1 AND stage = 'einladung' AND assessment_event_id = (SELECT id FROM assessment_event WHERE case_id = $1 AND timepoint = 'BL')`;
+
+  it('Abmeldung (nur E-Mail-Kanal): Worker storniert statt zu senden; Einwilligung bleibt gültig', async () => {
+    const { cs } = await newCase(today());
+    await isolateOutbox(cs.id);
+    await owner.query(`INSERT INTO contact_preference (patient_id, center_id, email_status, source) SELECT id, center_id, 'abgemeldet', 'portal' FROM patient WHERE id = $1`, [cs.patientId]);
+    const mail = fakeProvider({});
+    await runOnce(deps(mail));
+    expect(mail.delivered).toHaveLength(0);
+    expect((await owner.query(`SELECT status, cancel_reason FROM outbox_message WHERE ${blInvite}`, [cs.id])).rows[0]).toEqual({ status: 'storniert', cancel_reason: 'E-Mail-Erinnerungen abbestellt' });
+    expect((await owner.query('SELECT status FROM consent_record WHERE patient_id = $1', [cs.patientId])).rows[0].status).toBe('gueltig');
+  });
+
+  it('dauerhaft abgewiesene Empfängeradresse: sofort Dead Letter, Kontakt „unzustellbar“, kein weiterer Versuch', async () => {
+    const { cs } = await newCase(today());
+    await isolateOutbox(cs.id);
+    const mail = fakeProvider({ rejectRecipient: true });
+    const r = await runOnce(deps(mail));
+    expect(r.unzustellbar).toBe(1);
+    expect((await owner.query(`SELECT status, attempts FROM outbox_message WHERE ${blInvite}`, [cs.id])).rows[0]).toEqual({ status: 'dead_letter', attempts: 1 });
+    expect((await owner.query('SELECT email_status, source FROM contact_preference WHERE patient_id = $1', [cs.patientId])).rows[0]).toEqual({ email_status: 'unzustellbar', source: 'versand' });
+    expect((await owner.query(`SELECT result FROM delivery_attempt WHERE outbox_id = (SELECT id FROM outbox_message WHERE ${blInvite})`, [cs.id])).rows.map((x) => x.result)).toEqual(['unzustellbar']);
+  });
+
+  it('erneut eingereiht: Versuchsbudget gilt je Nachricht, Versuchsnummern laufen weiter', async () => {
+    const { cs } = await newCase(today());
+    await isolateOutbox(cs.id);
+    await owner.query(`UPDATE outbox_message SET status = 'ausstehend', attempts = 5, max_attempts = 10, next_attempt_at = now() WHERE ${blInvite}`, [cs.id]);
+    const mail = fakeProvider({});
+    expect((await runOnce(deps(mail))).versendet).toBe(1);
+    expect((await owner.query(`SELECT status, attempts FROM outbox_message WHERE ${blInvite}`, [cs.id])).rows[0]).toEqual({ status: 'versendet', attempts: 6 });
   });
 });
 

@@ -17,6 +17,7 @@ import { MigrationController } from './modules/migration';
 import { PortalController } from './modules/portal';
 import { ExportsController, ReportsController } from './modules/reports';
 import { ResponsesController, ResponsesService } from './modules/responses';
+import { ContactPreferenceController, DispatchController } from './modules/versand';
 
 /** Modularer Monolith: Fachmodule teilen Datenbankzugriff, Audit und Rechteprüfung. */
 @Module({
@@ -34,6 +35,8 @@ import { ResponsesController, ResponsesService } from './modules/responses';
     AutoReportController,
     ExportsController,
     MigrationController,
+    DispatchController,
+    ContactPreferenceController,
   ],
   providers: [
     Db,

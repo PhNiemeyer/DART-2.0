@@ -59,6 +59,50 @@ function answersFor(schema: FormSchema, h: number): AnswerMap {
   return out;
 }
 
+/**
+ * Synthetische Versandfälle für den Versand-Leitstand (R-14): Dead Letters, unklare Zustellung, Abmeldung, unzustellbare Adresse.
+ * Es wird nichts versendet; offene Wiederholungen liegen 30 Tage in der Zukunft. Idempotent über die Schlüssel „demo-versand-*“.
+ */
+async function demoVersand(c: Client) {
+  const plan: Array<{ n: number; center: string; status: string; attempts: number; error: string | null; cancel?: string; contact?: 'abgemeldet' | 'unzustellbar'; results: string[] }> = [
+    { n: 1, center: 'Z-101', status: 'dead_letter', attempts: 5, error: 'ECONNREFUSED', results: ['fehler', 'fehler', 'fehler', 'fehler', 'fehler'] },
+    { n: 2, center: 'Z-101', status: 'dead_letter', attempts: 1, error: 'Empfänger abgewiesen (550)', contact: 'unzustellbar', results: ['unzustellbar'] },
+    { n: 3, center: 'Z-101', status: 'unklar', attempts: 1, error: 'ETIMEDOUT', results: ['unklar'] },
+    { n: 4, center: 'Z-101', status: 'fehlgeschlagen', attempts: 2, error: 'ESOCKET', results: ['fehler', 'fehler'] },
+    { n: 5, center: 'Z-101', status: 'storniert', attempts: 0, error: null, cancel: 'E-Mail-Erinnerungen abbestellt', contact: 'abgemeldet', results: [] },
+    { n: 6, center: 'Z-102', status: 'dead_letter', attempts: 5, error: 'ECONNREFUSED', results: ['fehler', 'fehler', 'fehler', 'fehler', 'fehler'] },
+    { n: 7, center: 'Z-102', status: 'unklar', attempts: 1, error: 'ETIMEDOUT', results: ['unklar'] },
+  ];
+  let created = 0;
+  for (const m of plan) {
+    const t = (await c.query(
+      `SELECT tc.id AS case_id, tc.patient_id, tc.center_id, e.id AS event_id FROM treatment_case tc JOIN patient p ON p.id = tc.patient_id JOIN center ce ON ce.id = tc.center_id
+         LEFT JOIN assessment_event e ON e.case_id = tc.id AND e.timepoint = 'M12'
+        WHERE p.pseudonym LIKE 'P-DEMO%' AND ce.code = $1 ORDER BY p.pseudonym OFFSET $2 LIMIT 1`,
+      [m.center, m.n],
+    )).rows[0];
+    if (!t) continue;
+    const r = await c.query(
+      `INSERT INTO outbox_message (idempotency_key, kind, center_id, patient_id, case_id, assessment_event_id, rule_version, stage, scheduled_at, status, attempts, max_attempts, next_attempt_at, last_error, cancel_reason, updated_at)
+       VALUES ($1,'erinnerung',$2,$3,$4,$5,'FU-PLAN-KNIE V1','erinnerung-7', now() - make_interval(days => $6), $7, $8, 5, now() + interval '30 days', $9, $10, now() - make_interval(hours => $6))
+       ON CONFLICT (idempotency_key) DO NOTHING RETURNING id`,
+      [`demo-versand-${m.n}`, t.center_id, t.patient_id, t.case_id, t.event_id, m.n, m.status, m.attempts, m.error, m.cancel ?? null],
+    );
+    if (!r.rows[0]) continue;
+    created++;
+    for (const [i, res] of m.results.entries()) {
+      await c.query(`INSERT INTO delivery_attempt (outbox_id, attempt_no, started_at, finished_at, result, error_code) VALUES ($1,$2, now() - make_interval(hours => $3), now() - make_interval(hours => $3), $4, $5)`, [r.rows[0].id, i + 1, (m.results.length - i) * 6, res, m.error]);
+    }
+    if (m.contact) {
+      await c.query(
+        `INSERT INTO contact_preference (patient_id, center_id, email_status, source, reason) VALUES ($1,$2,$3,$4,$5) ON CONFLICT (patient_id) DO NOTHING`,
+        [t.patient_id, t.center_id, m.contact, m.contact === 'abgemeldet' ? 'portal' : 'versand', m.contact === 'abgemeldet' ? null : 'Empfängeradresse vom Mailserver abgewiesen'],
+      );
+    }
+  }
+  console.log(`[demo] Versand-Leitstand: ${created} synthetische Versandfälle angelegt (kein Versand)`);
+}
+
 async function main() {
   const url = process.env.SEED_DATABASE_URL;
   if (!url) throw new Error('SEED_DATABASE_URL fehlt');
@@ -70,6 +114,7 @@ async function main() {
     const existing = (await c.query(`SELECT count(*)::int AS n FROM patient WHERE pseudonym LIKE 'P-DEMO%'`)).rows[0].n;
     if (existing >= target) {
       console.log(`[demo] ${existing} synthetische Demofälle vorhanden – nichts zu tun`);
+      await demoVersand(c);
       return;
     }
     const centers = Object.fromEntries((await c.query('SELECT code, id FROM center')).rows.map((r) => [r.code, r.id]));
@@ -206,6 +251,7 @@ async function main() {
       if ((i + 1) % 50 === 0) console.log(`[demo] ${i + 1}/${target} synthetische Fälle`);
     }
     console.log(`[demo] fertig: ${target} synthetische Demofälle (P-DEMO…), ohne Kontaktdaten und ohne Versand`);
+    await demoVersand(c);
   } finally {
     await c.end();
   }

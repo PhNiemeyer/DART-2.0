@@ -263,6 +263,28 @@ test.describe.serial('DART 2.0 – vertikale Strecke', () => {
     await noHorizontalScroll(page);
   });
 
+  test('Versand-Leitstand: Dead Letters und unklare Zustellungen bearbeiten, Grund ist Pflicht', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 1000 });
+    await login(page, 'doku.nord');
+    await page.goto('/versand');
+    await expect(page.getByRole('heading', { name: 'Versand-Leitstand' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Versandjournal' })).toBeVisible();
+    await expect(page.getByText('Dead Letter', { exact: true }).first()).toBeVisible();
+    await expect(page.getByText('Adresse unzustellbar').first()).toBeVisible();
+    await page.getByRole('button', { name: 'Bearbeiten', exact: true }).first().click();
+    await expect(page.getByRole('button', { name: 'Stornieren' })).toBeDisabled();
+    await page.getByLabel(/Grund der Bearbeitung/).fill('Mailserver wieder erreichbar');
+    await expect(page.getByRole('button', { name: 'Stornieren' })).toBeEnabled();
+    expect(await unlabeledInputs(page)).toEqual([]);
+    await page.screenshot({ path: SHOT('21-versand-leitstand'), fullPage: true });
+    await page.setViewportSize({ width: 360, height: 800 });
+    await noHorizontalScroll(page);
+    await login(page, 'admin');
+    await page.goto('/versand');
+    await expect(page.getByRole('heading', { name: 'Übersicht aller Zentren' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Versandjournal' })).toHaveCount(0);
+  });
+
   test('Tastaturbedienung: sichtbarer Fokus und Sprunglink', async ({ page }) => {
     await page.goto('/anmelden');
     await expect(page.locator('button[data-user]').first()).toBeVisible();

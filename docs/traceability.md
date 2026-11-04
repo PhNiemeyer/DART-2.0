@@ -24,7 +24,7 @@ Alle Umsetzungen sind Prototyp-Stand mit synthetischen Daten; keine Fachfreigabe
 | F14 | Einmaliger Token nach bewusster Bestätigung, gehasht, kurzlebige Sitzung, begrenzte Versuche | `portal.ts`, `004_portal_funktionen.sql`, Web `/portal/einladung` | T02-5, T04 (abgelaufen), E2E 3, 9 | umgesetzt | – |
 | F15 | Widerruf sperrt sofort Versand, Tokens, Zugriff | `consent.ts` (withdraw), `followup.service.ts` (blockPatient) | T02-6, Worker (Consent vor Versand) | teilweise | Datenumgang nach Widerruf rechtlich offen (E-07) |
 | F16 | Versionierter Follow-up-Plan, kalendarisch, Datumskorrektur nur offene Termine | `domain/followup.ts`, `followup.service.ts` | Unit (Monatsende, Sommerzeit), T02-2, „Datumskorrektur“ | umgesetzt | Plan fachlich freizugeben (E-06); Nachholregeln nur als Fenster |
-| F17 | Erinnerungen 7/12 Tage, Arzt +3, Outbox, Idempotenz, Retry, Dead Letter, Abgleich | `worker/outbox.ts`, `mail.ts` | T02-10 (Worker), Mailpit-Durchlauf im Compose-Stack | teilweise | Oberfläche zur Bearbeitung von Dead Letters/Abmeldungen fehlt (R-14) |
+| F17 | Erinnerungen 7/12 Tage, Arzt +3, Outbox, Idempotenz, Retry, Dead Letter, Abgleich | `worker/outbox.ts`, `mail.ts` | T02-10 und R-14 (Worker: Abmeldung, abgewiesener Empfänger, Versuchsbudget), T06 (6 API-Tests), E2E Versand-Leitstand; Leitstand `versand.ts`, Web `/versand` | umgesetzt | Erinnerungszeiten fachlich freizugeben (E-06); produktive Rückläufer-Verarbeitung (R-27) |
 | F18 | Zentrumsberichte mit Nennern; Autoreport eigene Daten vs. Gesamtkollektiv | `reports.ts`, `autoreport.ts`, `007_autoreport.sql`, `domain/report.ts`, Web `/auswertung`, `/auswertung/autoreport` | T05 (6 Tests: Ebenen, Kleingruppen, Rechte, RLS, Delta), Unit (Altersgruppe, KI), E2E Autoreport | teilweise | Scores „Freigabe ausstehend“ (E-09); nicht risikoadjustiert (R-26, E-18); Nennertest Zentrumsbericht (R-15) |
 | F19 | Genehmigter, zweckgebundener Export mit Wörterbuch, Prüfsummen, Formelschutz | `reports.ts` (Exports), `worker/exports.ts` | Unit CSV, Worker-Export, API „Exportfreigabe“ | teilweise | Ebene Rohhistorie nicht exportierbar (R-16) |
 
@@ -60,7 +60,7 @@ Alle Umsetzungen sind Prototyp-Stand mit synthetischen Daten; keine Fachfreigabe
 
 | ID | Umsetzung | Status |
 |---|---|---|
-| T01 REST v1, OpenAPI, Fehlercodes, If-Match, Idempotency-Key | `docs/api/openapi.json` (76 Pfade), `errors.ts`, `http.ts` | umgesetzt |
+| T01 REST v1, OpenAPI, Fehlercodes, If-Match, Idempotency-Key | `docs/api/openapi.json` (84 Pfade), `errors.ts`, `http.ts` | umgesetzt |
 | T02 Abnahmefälle 1–10 | `apps/api/test/t02-abnahme.test.ts`, `apps/worker/test/t02-10-versand.test.ts` | alle 10 bestanden |
 | T03 Migrationstests | `apps/api/test/t03-migration.test.ts`, Unit Migration, `tools/variablenkatalog.py` | bestanden; V05-Hash stimmt, alle 1.441 Katalogzeilen und 33 Neuanlage-Vorschläge mit expliziter Klasse und Entscheidung, 0 Freigaben (keine erfunden) |
 | T04 Zusatzprüfungen | Upload/MIME/Malware, abgelaufener Link, Linkscanner, E-Mail-Fehler (Dead Letter), Datumskorrektur, Monatsende/Sommerzeit, Schemazyklus, unzulässiger Export, CSV-Formelinjektion, Tastatur, 360 px, Persistenz nach Neustart, Restore | bestanden; Screenreader-Test offen |

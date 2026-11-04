@@ -11,6 +11,7 @@ import { loadConfig, todayBerlin } from '../core/config';
 import { Db, Tx } from '../core/db';
 import { ApiError, conflict, invalid, notFound, requestIdOf } from '../core/errors';
 import { parse, rateLimit } from '../core/http';
+import { emailStatus, setEmailStatus } from './versand';
 import { VaultClient } from '../core/vault-client';
 import { ConsentService, demoSignatureAdapter, sha256 } from './consent';
 import { FollowUpService, loadCase, PLAN_REF } from './followup.service';
@@ -155,7 +156,27 @@ export class PortalController {
           document: x.status === 'signatur_ausstehend' || x.status === 'gueltig' ? { title: x.title, version: x.version, body: x.body, scopes: x.document_scopes.map((sc: string) => ({ code: sc, label: CONSENT_SCOPE_LABELS[sc as keyof typeof CONSENT_SCOPE_LABELS] })), isDemo: x.is_demo } : null,
         })),
         surveys,
+        emailReminders: (await emailStatus(c, s.patientId)).status,
       };
+    });
+  }
+
+  /**
+   * E-Mail-Erinnerungen ab- oder wieder anmelden (nur E-Mail-Kanal; Einwilligung und Befragungen bleiben bestehen).
+   * Eine vom Mailserver abgewiesene Adresse kann nur das Zentrum nach Adressprüfung wieder aktivieren.
+   */
+  @Post('email-reminders')
+  async emailReminders(@Body() body: unknown, @Req() req: Request) {
+    const s = await this.session(req);
+    const { active } = parse(z.object({ active: z.boolean() }), body);
+    return this.db.tx(this.scope(s), async (c) => {
+      const cur = await emailStatus(c, s.patientId);
+      if (active && cur.status === 'unzustellbar') throw conflict('ZUSTAND_UNZULAESSIG', 'Ihre E-Mail-Adresse konnte nicht zugestellt werden. Bitte wenden Sie sich an Ihr Zentrum, damit die Adresse geprüft wird.');
+      if (cur.status !== 'unzustellbar') {
+        await setEmailStatus(c, { patientId: s.patientId, centerId: s.centerId, status: active ? 'aktiv' : 'abgemeldet', source: 'portal', reason: null, userId: null });
+        await this.audit.write(c, { kind: 'patient', patientId: s.patientId }, { action: active ? 'email_reaktivierung_portal' : 'email_abmeldung_portal', objectType: 'kontakt', centerId: s.centerId, requestId: requestIdOf(req) });
+      }
+      return { emailReminders: (await emailStatus(c, s.patientId)).status };
     });
   }
 

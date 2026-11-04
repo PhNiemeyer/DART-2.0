@@ -160,6 +160,8 @@ export default function CasePage() {
         )}
       </section>
 
+      <ContactCard caseId={id} onError={setError} onDone={setMsg} />
+
       <section className="card" aria-labelledby="h-zeit">
         <h2 id="h-zeit">Follow-up-Zeitachse</h2>
         {d.events.length === 0 ? <p className="muted">Zeitachse wird nach gültiger Einwilligung geplant.</p> : (
@@ -275,5 +277,49 @@ function ModeChange({ c, onDone, onError }: any) {
       <button type="submit" className="btn-secondary btn-small" disabled={reason.trim().length < 5}>Wechsel zu {target === 'science' ? 'DART Science' : 'DART Basic'}</button>
       <span className="small muted">Bestehende Basic-Daten werden nicht rückwirkend zu Science.</span>
     </form>
+  );
+}
+
+const CONTACT_LABEL: Record<string, string> = { aktiv: 'E-Mail-Erinnerungen aktiv', abgemeldet: 'E-Mail-Erinnerungen abbestellt', unzustellbar: 'E-Mail-Adresse unzustellbar' };
+const CONTACT_TONE: Record<string, 'ok' | 'warn' | 'bad'> = { aktiv: 'ok', abgemeldet: 'warn', unzustellbar: 'bad' };
+const CONTACT_SOURCE: Record<string, string> = { portal: 'durch die Person im Portal', zentrum: 'durch das Zentrum', versand: 'automatisch nach Abweisung durch den Mailserver' };
+
+/** Kontaktstatus E-Mail (R-14): Abmeldung betrifft nur Erinnerungen per E-Mail, nicht die Einwilligung. */
+function ContactCard({ caseId, onDone, onError }: { caseId: string; onDone: (m: string) => void; onError: (e: ApiErr) => void }) {
+  const [c, setC] = useState<any>(null);
+  const [reason, setReason] = useState('');
+  const [checked, setChecked] = useState(false);
+  const load = useCallback(() => api(`/cases/${caseId}/contact-preference`).then(setC).catch(onError), [caseId, onError]);
+  useEffect(() => { void load(); }, [load]);
+  if (!c) return null;
+  async function save(emailStatus: 'aktiv' | 'abgemeldet') {
+    try {
+      await api(`/cases/${caseId}/contact-preference`, { method: 'PUT', body: { emailStatus, reason, addressChecked: checked || undefined } });
+      setReason('');
+      setChecked(false);
+      onDone(emailStatus === 'abgemeldet' ? 'E-Mail-Erinnerungen abbestellt. Einwilligung und Befragungen bleiben bestehen.' : 'E-Mail-Erinnerungen wieder aktiv. Offene Nachrichten können im Versand-Leitstand erneut eingereiht werden.');
+      void load();
+    } catch (e) {
+      onError(e as ApiErr);
+    }
+  }
+  return (
+    <section className="card" aria-labelledby="h-kontakt" id="kontakt">
+      <h2 id="h-kontakt">Kontakt per E-Mail</h2>
+      <p><Badge tone={CONTACT_TONE[c.status]}>{CONTACT_LABEL[c.status]}</Badge>{c.source && <span className="small muted"> · {CONTACT_SOURCE[c.source] ?? c.source}, {fmtDateTime(c.updatedAt)}{c.reason ? ` – ${c.reason}` : ''}</span>}</p>
+      <p className="small muted">Betrifft nur Einladungen und Erinnerungen per E-Mail. Einwilligung, Befragungen und der persönliche Link vor Ort bleiben unberührt.</p>
+      {c.canEdit && (
+        <div className="grid" style={{ marginTop: 8 }}>
+          <div className="field"><label htmlFor="ct-r">Grund (Pflicht, wird protokolliert)</label><input id="ct-r" type="text" maxLength={300} value={reason} onChange={(e) => setReason(e.target.value)} placeholder={c.status === 'aktiv' ? 'z. B. telefonisch abbestellt' : 'z. B. Adresse telefonisch bestätigt'} /></div>
+          {c.status === 'unzustellbar' && <label className="choice"><input type="checkbox" checked={checked} onChange={(e) => setChecked(e.target.checked)} />E-Mail-Adresse wurde geprüft bzw. korrigiert</label>}
+          <div className="row">
+            {c.status === 'aktiv'
+              ? <button className="btn-secondary" disabled={reason.trim().length < 3} onClick={() => save('abgemeldet')}>E-Mail-Erinnerungen abbestellen</button>
+              : <button className="btn-secondary" disabled={reason.trim().length < 3 || (c.status === 'unzustellbar' && !checked)} onClick={() => save('aktiv')}>Wieder aktivieren</button>}
+            <Link className="small" href="/versand">Zum Versand-Leitstand</Link>
+          </div>
+        </div>
+      )}
+    </section>
   );
 }

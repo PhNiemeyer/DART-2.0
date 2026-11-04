@@ -9,6 +9,7 @@ const NAV: Array<{ href: string; label: string; perm?: string }> = [
   { href: '/faelle/neu', label: 'Fall anlegen', perm: 'case.write' },
   { href: '/nachweise', label: 'Nachweise prüfen', perm: 'consent.review' },
   { href: '/auswertung', label: 'Auswertung & Export' },
+  { href: '/versand', label: 'Versand', perm: 'dispatch.manage' },
   { href: '/formulare', label: 'Formulare', perm: 'form.read' },
   { href: '/migration', label: 'Migration', perm: 'migration.run' },
   { href: '/admin', label: 'Administration', perm: 'admin.manage' },
@@ -19,6 +20,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
   const path = usePathname();
   const router = useRouter();
   const items = NAV.filter((n) => {
+    if (n.href === '/versand') return can(me, 'dispatch.manage') || can(me, 'dispatch.overview');
     if (n.href === '/auswertung') return can(me, 'report.read') || can(me, 'export.request') || can(me, 'export.approve');
     return !n.perm || can(me, n.perm);
   });

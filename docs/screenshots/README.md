@@ -20,3 +20,4 @@
 | 18-fall-360.png | Falldetail bei 360 px Breite |
 | 19-variablenkatalog.png | Variablenkatalog V05 (Originalquellen), gefiltert nach Prüfhinweis |
 | 20-autoreport.png | Autoreport: IKDC nach Pathologie, eigene Fälle vs. Gesamtkollektiv, Verlauf, Patientencharakteristika |
+| 21-versand-leitstand.png | Versand-Leitstand: Dead Letters, unzustellbare Adressen, Bearbeitung mit Pflichtgrund |
