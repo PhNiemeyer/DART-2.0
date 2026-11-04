@@ -47,14 +47,17 @@ export type Permission =
   | 'admin.manage'
   | 'audit.read'
   | 'dispatch.manage'
-  | 'dispatch.overview';
+  | 'dispatch.overview'
+  | 'dsr.record'
+  | 'dsr.manage'
+  | 'dsr.overview';
 
 /** Rollenmatrix (Lastenheft Kap. 12). Technischer Betrieb: keine fachlichen Rechte. */
 export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
-  zentrale_admin: ['admin.manage', 'audit.read', 'export.approve', 'form.read', 'dispatch.overview'],
-  zentrumsverantwortlich: ['case.read', 'case.write', 'identity.read', 'consent.review', 'report.read', 'form.read', 'dispatch.manage'],
+  zentrale_admin: ['admin.manage', 'audit.read', 'export.approve', 'form.read', 'dispatch.overview', 'dsr.overview'],
+  zentrumsverantwortlich: ['case.read', 'case.write', 'identity.read', 'consent.review', 'report.read', 'form.read', 'dispatch.manage', 'dsr.record', 'dsr.manage'],
   arzt: ['case.read', 'case.write', 'case.finalize', 'identity.read', 'identity.write', 'consent.manage', 'consent.review', 'report.read', 'form.read'],
-  dokumentation: ['case.read', 'case.write', 'identity.read', 'identity.write', 'consent.manage', 'form.read', 'dispatch.manage'],
+  dokumentation: ['case.read', 'case.write', 'identity.read', 'identity.write', 'consent.manage', 'form.read', 'dispatch.manage', 'dsr.record'],
   datenmanagement: ['case.read', 'report.read', 'export.request', 'migration.run', 'form.read'],
   formularredaktion: ['form.read', 'form.draft'],
   formularfreigabe: ['form.read', 'form.publish'],

@@ -199,3 +199,6 @@ table.data .nowrap { white-space: nowrap; }
 .diff-new { font-weight: 600; }
 .diff-table { table-layout: fixed; width: 100%; }
 .diff-table td, .diff-table th { white-space: normal; overflow-wrap: anywhere; vertical-align: top; text-align: left; }
+
+/* Auskunft (R-19): Abstand zwischen Abschnitten */
+.print-block h3 { margin-top: var(--space-3, 24px); }

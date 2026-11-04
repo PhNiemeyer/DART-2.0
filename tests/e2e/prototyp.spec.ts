@@ -262,6 +262,44 @@ test.describe.serial('DART 2.0 – vertikale Strecke', () => {
     await noHorizontalScroll(page);
   });
 
+  test('Betroffenenrechte: Antrag im Fall erfassen, Identität prüfen, Auskunft erstellen; Fristen sichtbar', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 1000 });
+    await login(page, 'leitung.nord');
+    await page.goto('/betroffenenrechte');
+    await expect(page.getByRole('heading', { name: 'Betroffenenrechte', level: 1 })).toBeVisible();
+    await expect(page.getByText(/überfällig seit \d+ Tag/).first()).toBeVisible();
+    expect(await unlabeledInputs(page)).toEqual([]);
+    await page.screenshot({ path: SHOT('24-betroffenenrechte'), fullPage: false });
+    // Neuer Antrag über den Fall
+    // Testfall anlegen als Dokumentation (Identität anlegen darf die Zentrumsleitung nicht), danach zurück zur Leitung
+    await page.request.post('/api/v1/auth/dev-login', { headers: { 'x-dart-csrf': '1' }, data: { username: 'doku.nord' } });
+    const me = await (await page.request.get('/api/v1/auth/me', { headers: { 'x-dart-csrf': '1' } })).json();
+    const centerId = me.centers.find((x: { code: string }) => x.code === 'Z-101').id;
+    const created = await page.request.post('/api/v1/cases', { headers: { 'x-dart-csrf': '1' }, data: {
+      patient: { firstName: 'Erika', lastName: `${LAST}Dsr`, email: `dsr${uniq}@example.invalid` }, centerId, joint: 'knie', side: 'rechts',
+      treatmentType: 'operativ', plannedOpDate: '2026-12-01', mode: 'basic', registers: ['DART'], modules: [], procedures: [] } });
+    expect(created.ok(), await created.text()).toBe(true);
+    await page.request.post('/api/v1/auth/dev-login', { headers: { 'x-dart-csrf': '1' }, data: { username: 'leitung.nord' } });
+    await page.goto(`/faelle/${(await created.json()).id}`);
+    await page.getByText('Neuen Antrag erfassen').click();
+    await page.getByLabel('Art des Antrags').selectOption('auskunft');
+    await page.getByLabel('Anliegen (ohne Gesundheitsdaten)').fill('Auskunft per Post erbeten (synthetisch)');
+    await page.getByRole('button', { name: 'Antrag erfassen' }).click();
+    await expect(page.getByText(/Antrag erfasst\. Frist:/)).toBeVisible();
+    await page.locator('#betroffenenrechte').getByRole('link', { name: 'Auskunft (Art. 15)' }).first().click();
+    await expect(page.getByRole('heading', { name: 'Auskunft (Art. 15)' })).toBeVisible();
+    await expect(page.getByRole('button', { name: /Auskunft zusammenstellen/ })).toHaveCount(0); // erst nach Identitätsprüfung
+    await page.getByLabel('1. Identität prüfen').selectOption('persoenlich_ausweis');
+    await page.getByRole('button', { name: 'Identität als geprüft dokumentieren' }).click();
+    await expect(page.getByText('Identitätsprüfung dokumentiert.')).toBeVisible();
+    await page.getByRole('button', { name: /Auskunft zusammenstellen/ }).click();
+    await expect(page.getByRole('heading', { name: /Auskunft nach Art\. 15 DSGVO/ })).toBeVisible();
+    await expect(page.getByText('Auskunft erstellt').first()).toBeVisible();
+    await page.screenshot({ path: SHOT('25-auskunft'), fullPage: true });
+    await page.setViewportSize({ width: 360, height: 800 });
+    await noHorizontalScroll(page);
+  });
+
   test('Papierweg: Upload in Prüfung und Prüfansicht', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 1000 });
     await login(page, 'doku.nord');

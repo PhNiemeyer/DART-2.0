@@ -135,7 +135,7 @@ export class CasesController {
     const today = todayBerlin();
     return this.db.tx({ centerIds: readableCenters(actor) }, async (c) => {
       const cs = await caseForActor(c, actor, id, 'case.read');
-      const patient = (await c.query('SELECT id, pseudonym, vault_ref, synthetic FROM patient WHERE id = $1', [cs.patient_id])).rows[0];
+      const patient = (await c.query('SELECT id, pseudonym, vault_ref, synthetic, restricted_at, restricted_reason FROM patient WHERE id = $1', [cs.patient_id])).rows[0];
       const consents = (await c.query(
         `SELECT cr.id, cr.status, cr.method, cr.scopes, cr.signed_date, cr.uploaded_at, cr.reviewed_at, cr.rejection_reason, cr.created_at, cr.revision,
                 d.title AS document_title, d.version AS document_version
@@ -166,7 +166,7 @@ export class CasesController {
       const expectedForms = resolveQuestionnaires({ joint: cs.joint, mode: cs.mode, treatment: cs.treatment_type, registers: cs.registers, modules: cs.modules }, 'arzt', 'BL');
       return {
         case: { ...cs, patient_id: undefined },
-        patient: { id: patient.id, pseudonym: patient.pseudonym, synthetic: patient.synthetic },
+        patient: { id: patient.id, pseudonym: patient.pseudonym, synthetic: patient.synthetic, restrictedAt: patient.restricted_at, restrictedReason: patient.restricted_reason },
         consents,
         events,
         responses,

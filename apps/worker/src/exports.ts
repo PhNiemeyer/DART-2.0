@@ -63,8 +63,9 @@ export async function buildExport(c: PoolClient, job: Job) {
             (SELECT mode FROM capture_mode_history h WHERE h.case_id = tc.id AND h.valid_to IS NULL) AS mode,
             COALESCE((SELECT array_agg(register_code ORDER BY register_code) FROM case_register_membership r WHERE r.case_id = tc.id AND r.valid_to IS NULL), '{}') AS registers,
             COALESCE((SELECT array_agg(module_code ORDER BY module_code) FROM case_module m WHERE m.case_id = tc.id AND m.active), '{}') AS modules
-       FROM treatment_case tc JOIN center ce ON ce.id = tc.center_id
+       FROM treatment_case tc JOIN center ce ON ce.id = tc.center_id JOIN patient pa ON pa.id = tc.patient_id
       WHERE ($1::uuid[] IS NULL OR tc.center_id = ANY($1))
+        AND pa.restricted_at IS NULL -- eingeschränkte Verarbeitung (R-19): nicht exportieren
         AND COALESCE(tc.actual_op_date, tc.planned_op_date, tc.conservative_start_date) BETWEEN $2 AND $3`,
     [job.center_ids, job.period_from, job.period_to],
   )).rows;

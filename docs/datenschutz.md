@@ -35,5 +35,6 @@ Keine Altverfahren (MD5, Triple-DES) übernommen.
 | Versandjournal | Kern-DB | offen | offen | – | – |
 | Rohhistorie Migration | Schema legacy | offen | offen | – | offen |
 
-Betroffenenrechte: Tabelle `data_subject_request` (Auskunft, Berichtigung, Einschränkung, Widerruf, Löschung mit Fälligkeit) ist angelegt;
-Bearbeitungsoberfläche fehlt (Restliste R-19). Sicherheitsvorfälle: Prozess mit Bewertung, Eskalation und Prüfung der 72-h-Meldefrist ist zu definieren.
+Betroffenenrechte: Bearbeitung im Zentrum unter „Betroffenenrechte“ (ADR-0013) mit Frist (ein Monat, einmal verlängerbar),
+Pflicht-Identitätsprüfung, Auskunftsentwurf, Einschränkung (sperrt Versand, Exporte, Auswertungen) und vorbereiteter Löschung;
+die endgültige Löschung bleibt bis zur Freigabe der Matrix ein manueller, protokollierter Schritt (E-07, R-29). Sicherheitsvorfälle: Prozess mit Bewertung, Eskalation und Prüfung der 72-h-Meldefrist ist zu definieren.

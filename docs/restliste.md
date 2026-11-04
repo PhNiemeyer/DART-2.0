@@ -22,7 +22,7 @@ P1 = vor Pilot-MVP erforderlich, P2 = Ausbau. Fachliche Freigaben stehen in `doc
 | R-16 | P2 | Export Rohhistorie | Berechtigter Export der Migrations-Rohhistorie |
 | R-17 | P1 | Migration | Originalexporte verschlüsselt ablegen, freigegebene Mappings (Katalog V05 liegt vor), zwei Probeläufe, Cutover-Plan (E-11, E-12) |
 | R-18 | P1 | Barrierefreiheit | Vollständiger WCAG-2.2-AA-Audit inkl. Screenreader (NVDA/VoiceOver) |
-| R-19 | P1 | Betroffenenrechte | Bearbeitungsoberfläche für Auskunft/Berichtigung/Einschränkung/Löschung mit Fristen |
+| R-19 | – | Betroffenenrechte | **Erledigt** (04.11.2026): Erfassung im Fall, Fristen mit Verlängerung, Identitätsprüfung, Auskunft, Einschränkung, vorbereitete Löschung (ADR-0013) |
 | R-20 | – | Datumseingabe | **Erledigt** (03.11.2026): `DateInput` mit TT.MM.JJJJ, Prüfung auf Kalendergültigkeit und Grenzen, feldnahe Fehler |
 | R-21 | P2 | Weitere Gelenke | Schulter, Hüfte, Sprunggelenk (Datenmodell vorbereitet, in der Anlage deaktiviert) |
 | R-22 | P1 | CI | GitHub-Workflow ist angelegt, in dieser Umgebung aber nicht ausgeführt; im Ziel-Repository aktivieren und prüfen |
@@ -31,4 +31,5 @@ P1 = vor Pilot-MVP erforderlich, P2 = Ausbau. Fachliche Freigaben stehen in `doc
 | R-26 | P1 | Benchmarking | Risikoadjustierung (Alter, BMI, Baseline-Score), Funnel-Plot, MCID-Anteile, Freigabe der Methodik (E-18) |
 | R-27 | P1 | Rückläufer | Asynchrone Bounce-/Beschwerdemeldungen des produktiven Mailanbieters (Webhook) auf „unzustellbar“ abbilden |
 | R-28 | P2 | Editor | Pflichtvermerk (Begründung) für kritische Änderungen vor „Zur Prüfung einreichen“; Anzeige des Vergleichs in der Freigabeansicht |
+| R-29 | P1 | Löschung | Automatisierte, nachweisbare Löschung/Anonymisierung je Datenklasse nach freigegebener Matrix (E-07), inkl. Exporte und Backups |
 | R-25 | P1 | Mapping-Freigabe | Oberfläche, um je Katalogzeile Zielkonzept, Regel und Freigabeperson zu erfassen (Vier-Augen), daraus neue Mappingversion erzeugen |
