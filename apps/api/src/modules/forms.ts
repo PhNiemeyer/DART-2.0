@@ -1,6 +1,6 @@
-import { Body, Controller, Get, Param, ParseUUIDPipe, Post, Put, Req } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseUUIDPipe, Post, Put, Query, Req } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { canonicalJson, FormItem, FormSchema, validateSchema } from '@dart/forms';
+import { canonicalJson, diffSchemas, FormItem, FormSchema, validateSchema } from '@dart/forms';
 import { Request } from 'express';
 import { z } from 'zod';
 import { Audit } from '../core/audit';
@@ -207,6 +207,27 @@ export class FormsController {
       if (!r.rows.length) throw conflict('ZUSTAND_UNZULAESSIG', 'Nur Entwürfe ab Version 2 können verworfen werden.');
       await this.audit.write(c, actor, { action: 'formular_entwurf_verwerfen', objectType: 'formularversion', objectId: id, requestId: requestIdOf(req) });
       return { id, deleted: true };
+    });
+  }
+
+  /**
+   * Versionsvergleich (R-10): diese Version gegenüber einer anderen Version desselben Formulars
+   * (Standard: unmittelbare Vorgängerversion). Vergleich über stabile Item-IDs, kritische Änderungen markiert.
+   */
+  @Get('form-versions/:id/diff')
+  @Perm('form.read')
+  diff(@Param('id', ParseUUIDPipe) id: string, @Query() query: Record<string, string>) {
+    const q = parse(z.object({ gegen: z.string().uuid().optional() }), query);
+    return this.tx(async (c) => {
+      const v = (await c.query('SELECT id, questionnaire_id, version, status, schema FROM questionnaire_version WHERE id = $1', [id])).rows[0];
+      if (!v) throw notFound();
+      const versionen = (await c.query('SELECT id, version, status FROM questionnaire_version WHERE questionnaire_id = $1 ORDER BY version DESC', [v.questionnaire_id])).rows;
+      const base = q.gegen
+        ? (await c.query('SELECT id, questionnaire_id, version, status, schema FROM questionnaire_version WHERE id = $1', [q.gegen])).rows[0]
+        : (await c.query('SELECT id, questionnaire_id, version, status, schema FROM questionnaire_version WHERE questionnaire_id = $1 AND version < $2 ORDER BY version DESC LIMIT 1', [v.questionnaire_id, v.version])).rows[0];
+      if (q.gegen && (!base || base.questionnaire_id !== v.questionnaire_id)) throw invalid('Verglichen werden nur Versionen desselben Formulars.');
+      const meta = (x: { id: string; version: number; status: string }) => ({ id: x.id, version: x.version, status: x.status });
+      return { ziel: meta(v), basis: base ? meta(base) : null, versionen, diff: base ? diffSchemas(base.schema, v.schema) : null };
     });
   }
 

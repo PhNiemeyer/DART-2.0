@@ -13,7 +13,7 @@ P1 = vor Pilot-MVP erforderlich, P2 = Ausbau. Fachliche Freigaben stehen in `doc
 | R-07 | P1 | Sonderzugriff | Zeitlich begrenzter, begründeter, auditierter Break-Glass-Zugriff |
 | R-08 | P1 | Zentrumsverantwortliche | Antragsworkflow für Team- und Prozessänderungen |
 | R-09 | P1 | Datenmanagement | Pseudonyme Qualitätsanfragen an Zentren (Anlegen, Beantworten, Schließen) |
-| R-10 | P1 | Editor | Wiederholbare Gruppen, Verzweigungsassistent, Diff zwischen Versionen in der Oberfläche |
+| R-10 | – | Editor | **Erledigt** (04.11.2026): Gruppen im Editor, Verzweigungsassistent mit Klartext, Versionsvergleich mit kritischen Änderungen (ADR-0012) |
 | R-11 | P1 | Zuordnungsmatrix | Pflege und Versionierung der Matrix in der Oberfläche statt Codedatei |
 | R-12 | P2 | Upgrades | NestJS 12, TypeScript 7, Vitest 5 prüfen (ADR-0001) |
 | R-13 | P1 | Originalscores | Historische Originalscores als `original_historisch` übernehmen, getrennt von Neuberechnung |
@@ -30,4 +30,5 @@ P1 = vor Pilot-MVP erforderlich, P2 = Ausbau. Fachliche Freigaben stehen in `doc
 | R-24 | P2 | Mehrsprachigkeit | Neuanlage-Vorschlag 33 (language/translation_version): Übersetzungsversionen für Bögen und Oberfläche |
 | R-26 | P1 | Benchmarking | Risikoadjustierung (Alter, BMI, Baseline-Score), Funnel-Plot, MCID-Anteile, Freigabe der Methodik (E-18) |
 | R-27 | P1 | Rückläufer | Asynchrone Bounce-/Beschwerdemeldungen des produktiven Mailanbieters (Webhook) auf „unzustellbar“ abbilden |
+| R-28 | P2 | Editor | Pflichtvermerk (Begründung) für kritische Änderungen vor „Zur Prüfung einreichen“; Anzeige des Vergleichs in der Freigabeansicht |
 | R-25 | P1 | Mapping-Freigabe | Oberfläche, um je Katalogzeile Zielkonzept, Regel und Freigabeperson zu erfassen (Vier-Augen), daraus neue Mappingversion erzeugen |

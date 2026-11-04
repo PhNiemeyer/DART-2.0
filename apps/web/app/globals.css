@@ -187,3 +187,15 @@ table.data .nowrap { white-space: nowrap; }
   .card { break-inside: avoid; border-color: #999; }
   body { background: #fff; }
 }
+
+/* Formulareditor (R-10): Verzweigungsassistent, Gruppen, Versionsvergleich */
+.rule-builder { border: 1px dashed var(--border); border-radius: var(--radius-lg); padding: var(--space-2); }
+.rule-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: var(--space-1, 8px) var(--space-2); align-items: end; margin-bottom: var(--space-2); }
+.rule-row .field { margin-bottom: 0; }
+@media (min-width: 1001px) { .editor-grid > div:last-child { position: sticky; top: var(--space-2); align-self: start; max-height: calc(100vh - 2 * var(--space-2)); overflow-y: auto; } }
+.group-editor { border-left: 4px solid var(--blue); padding-left: var(--space-2); }
+.diff-item { border: 1px solid var(--border); border-radius: var(--radius-lg); padding: var(--space-2); }
+.diff-old { text-decoration: line-through; text-decoration-thickness: 1px; color: var(--muted); }
+.diff-new { font-weight: 600; }
+.diff-table { table-layout: fixed; width: 100%; }
+.diff-table td, .diff-table th { white-space: normal; overflow-wrap: anywhere; vertical-align: top; text-align: left; }
