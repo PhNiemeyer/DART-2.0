@@ -8,6 +8,7 @@ import { Idempotency, RequestContextMiddleware } from './core/http';
 import { VaultClient } from './core/vault-client';
 import { AdminController, AuthController, MetaController } from './modules/admin';
 import { AutoReportController } from './modules/autoreport';
+import { DsrController } from './modules/betroffenenrechte';
 import { CasesController } from './modules/cases';
 import { ConsentController, ConsentService } from './modules/consent';
 import { FollowUpService } from './modules/followup.service';
@@ -37,6 +38,7 @@ import { ContactPreferenceController, DispatchController } from './modules/versa
     MigrationController,
     DispatchController,
     ContactPreferenceController,
+    DsrController,
   ],
   providers: [
     Db,

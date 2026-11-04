@@ -64,6 +64,8 @@ Auf `/anmelden` erscheint im Modus `AUTH_MODE=dev` eine Auswahl. Kein Passwort �
    abbestellen, ohne die Einwilligung zu berühren.
 8. Als `redaktion` → **Formulare** → Version öffnen: wiederholbare Gruppen anlegen, Verzweigungen mit dem Assistenten
    bauen (Klartext und Live-Vorschau), bei Version > 1 **Mit Vorgängerversion vergleichen** (kritische Änderungen markiert).
+9. Als `leitung.nord` → **Betroffenenrechte**: Fristen und überfällige Anträge; im Fall einen Antrag erfassen, Identität prüfen,
+   Auskunft zusammenstellen, Verarbeitung einschränken oder Löschung vorbereiten (keine automatische Löschung).
 
 ### Daten zurücksetzen
 

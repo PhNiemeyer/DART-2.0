@@ -43,9 +43,9 @@ Alle Umsetzungen sind Prototyp-Stand mit synthetischen Daten; keine Fachfreigabe
 
 | ID | Umsetzung | Status |
 |---|---|---|
-| D01 Rechtsgrundlagen, VVT, DSFA, Betroffenenrechte | Gliederung und Vorlagen in `docs/datenschutz.md`; Tabelle `data_subject_request` | offen (Liefergegenstände vor Pilot) |
+| D01 Rechtsgrundlagen, VVT, DSFA, Betroffenenrechte | Gliederung und Vorlagen in `docs/datenschutz.md`; Betroffenenrechte umgesetzt (`betroffenenrechte.ts`, Web `/betroffenenrechte`, T08, E2E) | teilweise (VVT, DSFA, Informationstext vor Pilot) |
 | D02 Geringste Rechte, Verschlüsselung, MFA, Rate Limits, CSRF/XSS/Injection, Audit | Rollen/RLS, Vault-Verschlüsselung, Rate Limits, CSRF-Header, CSP, parametrisierte SQL, Audit append-only, datensparsame Logs | teilweise (TLS/Reverse Proxy, KMS, Rotation, MFA-Pflicht: R-02/R-03/R-05) |
-| D03 Lösch-/Aufbewahrungsmatrix, Restore, Betroffenenrechte | Vorlage in `docs/datenschutz.md`; Restore-Probe `tools/backup-restore-probe.sh` (bestanden) | teilweise |
+| D03 Lösch-/Aufbewahrungsmatrix, Restore, Betroffenenrechte | Vorlage in `docs/datenschutz.md`; Restore-Probe `tools/backup-restore-probe.sh` (bestanden); Anträge mit Fristen, Einschränkung, vorbereitete Löschung (ADR-0013, T08) | teilweise (Matrix E-07, automatisierte Löschung R-29) |
 | D04 SLO, Performance, Release/Rollback, Monitoring | `docs/betrieb.md`; Healthchecks | offen: Lasttest mit 100.000 Fällen **nicht durchgeführt** (R-06) |
 
 ## Oberfläche U01–U03
@@ -60,7 +60,7 @@ Alle Umsetzungen sind Prototyp-Stand mit synthetischen Daten; keine Fachfreigabe
 
 | ID | Umsetzung | Status |
 |---|---|---|
-| T01 REST v1, OpenAPI, Fehlercodes, If-Match, Idempotency-Key | `docs/api/openapi.json` (85 Pfade), `errors.ts`, `http.ts` | umgesetzt |
+| T01 REST v1, OpenAPI, Fehlercodes, If-Match, Idempotency-Key | `docs/api/openapi.json` (95 Pfade), `errors.ts`, `http.ts` | umgesetzt |
 | T02 Abnahmefälle 1–10 | `apps/api/test/t02-abnahme.test.ts`, `apps/worker/test/t02-10-versand.test.ts` | alle 10 bestanden |
 | T03 Migrationstests | `apps/api/test/t03-migration.test.ts`, Unit Migration, `tools/variablenkatalog.py` | bestanden; V05-Hash stimmt, alle 1.441 Katalogzeilen und 33 Neuanlage-Vorschläge mit expliziter Klasse und Entscheidung, 0 Freigaben (keine erfunden) |
 | T04 Zusatzprüfungen | Upload/MIME/Malware, abgelaufener Link, Linkscanner, E-Mail-Fehler (Dead Letter), Datumskorrektur, Monatsende/Sommerzeit, Schemazyklus, unzulässiger Export, CSV-Formelinjektion, Tastatur, 360 px, Persistenz nach Neustart, Restore | bestanden; Screenreader-Test offen |

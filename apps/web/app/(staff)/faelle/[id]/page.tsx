@@ -3,7 +3,9 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import { api, ApiErr, fileToBase64 } from '@/lib/api';
-import { CASE_STATUS_LABEL, fmtDate, fmtDateTime, JOINT_LABEL, OUTBOX_STATUS_LABEL, RESPONSE_STATUS_LABEL } from '@/lib/format';
+import { CASE_STATUS_LABEL, fmtDate, fmtDateTime, JOINT_LABEL, OUTBOX_STATUS_LABEL, RESPONSE_STATUS_LABEL, todayIso } from '@/lib/format';
+import { DSR_CHANNEL, DSR_KIND, DSR_STATUS, fristText } from '@/lib/dsr';
+import { can, useMe } from '@/lib/session';
 import { Onsite, takeOnsite } from '@/lib/onsite';
 import { Alert, Badge, ConceptNote, ConsentBadge, ErrorBox, EventBadge, Loading } from '@/components/ui';
 import { DateInput } from '@/components/DateInput';
@@ -73,6 +75,7 @@ export default function CasePage() {
         </div>
       </div>
       <ConceptNote />
+      {d.patient.restrictedAt && <Alert kind="warning" title="Verarbeitung eingeschränkt (Art. 18 DSGVO)">Seit {fmtDateTime(d.patient.restrictedAt)}: {d.patient.restrictedReason}. Keine Exporte, Auswertungen oder Einladungen. <Link href="#betroffenenrechte">Zum Antrag</Link></Alert>}
       <ErrorBox error={error} />
       {msg && <Alert kind="success">{msg}</Alert>}
       {c.status === 'consent_ausstehend' && <Alert kind="warning" title="Erfassung gesperrt">Medizinische Registerdaten können erst nach gültiger Einwilligung im benötigten Umfang erfasst werden.</Alert>}
@@ -161,6 +164,8 @@ export default function CasePage() {
       </section>
 
       <ContactCard caseId={id} onError={setError} onDone={setMsg} />
+
+      <DsrCard caseId={id} onError={setError} onDone={setMsg} />
 
       <section className="card" aria-labelledby="h-zeit">
         <h2 id="h-zeit">Follow-up-Zeitachse</h2>
@@ -320,6 +325,40 @@ function ContactCard({ caseId, onDone, onError }: { caseId: string; onDone: (m: 
           </div>
         </div>
       )}
+    </section>
+  );
+}
+
+/** Betroffenenrechte (R-19): Anträge zum Fall erfassen und Status sehen. Bearbeitung unter „Betroffenenrechte“. */
+function DsrCard({ caseId, onDone, onError }: { caseId: string; onDone: (m: string) => void; onError: (e: ApiErr) => void }) {
+  const me = useMe();
+  const [items, setItems] = useState<any[] | null>(null);
+  const [f, setF] = useState({ kind: '', receivedAt: todayIso(), channel: 'schriftlich', note: '' });
+  const load = useCallback(() => api(`/dsr?status=alle&caseId=${caseId}`).then((r) => setItems(r.items)).catch(onError), [caseId, onError]);
+  useEffect(() => { if (can(me, 'dsr.record')) void load(); }, [load, me]);
+  if (!can(me, 'dsr.record')) return null;
+  return (
+    <section className="card" aria-labelledby="h-dsr" id="betroffenenrechte">
+      <h2 id="h-dsr">Betroffenenrechte</h2>
+      {items && items.length > 0 && (
+        <ul>
+          {items.map((r) => {
+            const fr = fristText(r.tage_bis_frist, ['offen', 'in_bearbeitung'].includes(r.status));
+            return <li key={r.id}><Link href={`/betroffenenrechte/${r.id}`}>{DSR_KIND[r.kind]}</Link> vom {fmtDate(r.received_at)} · <Badge tone={DSR_STATUS[r.status].tone}>{DSR_STATUS[r.status].label}</Badge>{fr.text !== '–' && <> · <Badge tone={fr.tone}>{fr.text}</Badge></>}</li>;
+          })}
+        </ul>
+      )}
+      <details>
+        <summary>Neuen Antrag erfassen</summary>
+        <form className="grid grid-2" style={{ marginTop: 8 }} onSubmit={(e) => { e.preventDefault(); api('/dsr', { body: { caseId, ...f, note: f.note || undefined } }).then((r) => { onDone(`Antrag erfasst. Frist: ${fmtDate(r.dueDate)}.`); setF({ ...f, kind: '', note: '' }); void load(); }).catch(onError); }}>
+          <div className="field"><label htmlFor="dsr-k">Art des Antrags</label><select id="dsr-k" value={f.kind} onChange={(e) => setF({ ...f, kind: e.target.value })}><option value="">– bitte wählen –</option>{Object.entries(DSR_KIND).map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select></div>
+          <div className="field"><label htmlFor="dsr-c">Eingangsweg</label><select id="dsr-c" value={f.channel} onChange={(e) => setF({ ...f, channel: e.target.value })}>{Object.entries(DSR_CHANNEL).map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select></div>
+          <div className="field"><label htmlFor="dsr-d">Eingangsdatum</label><DateInput id="dsr-d" max={todayIso()} value={f.receivedAt} onChange={(iso) => setF({ ...f, receivedAt: iso })} /></div>
+          <div className="field"><label htmlFor="dsr-n">Anliegen (ohne Gesundheitsdaten)</label><input id="dsr-n" type="text" maxLength={2000} value={f.note} onChange={(e) => setF({ ...f, note: e.target.value })} /></div>
+          <div><button type="submit" className="btn-secondary" disabled={!f.kind || !f.receivedAt}>Antrag erfassen</button></div>
+        </form>
+        <p className="small muted">Frist: ein Monat ab Eingang (Art. 12 Abs. 3 DSGVO, Vorschlag). Bearbeitung und Identitätsprüfung durch die Zentrumsverantwortlichen.</p>
+      </details>
     </section>
   );
 }

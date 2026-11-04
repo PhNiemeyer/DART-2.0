@@ -251,12 +251,20 @@ describe('T02-6 Widerruf verhindert wartenden Versand und Zugriff', () => {
     const cs = await createCase(nord, C['Z-101']);
     const { consentId, patient } = await digitalConsent(nord, cs.patientId, ['register_basic', 'kontakt_followup']);
     let d = await caseDetail(nord, cs.id);
-    expect(d.outbox.some((o: { kind: string; status: string }) => o.kind === 'einladung' && o.status === 'ausstehend')).toBe(true);
+    // Der laufende Worker (Abfrage alle 5 s) kann die fällige Einladung bereits versendet haben – das ist zulässig.
+    expect(d.outbox.some((o: { kind: string; status: string }) => o.kind === 'einladung' && ['ausstehend', 'in_versand', 'versendet'].includes(o.status))).toBe(true);
     const w = await patient.post(`/api/v1/portal/consents/${consentId}/withdraw`, { confirm: true });
     expect(w.body.status).toBe('widerrufen');
-    d = await caseDetail(nord, cs.id);
+    // Kurzzeitige „in_versand“-Zustände abwarten: Der Worker prüft die Einwilligung unmittelbar vor dem Versand und storniert.
+    for (let i = 0; i < 20; i++) {
+      d = await caseDetail(nord, cs.id);
+      if (!d.outbox.some((o: { status: string }) => o.status === 'in_versand')) break;
+      await new Promise((r) => setTimeout(r, 500));
+    }
     expect(d.outbox.filter((o: { status: string }) => o.status === 'ausstehend')).toEqual([]);
-    expect(d.outbox.every((o: { status: string }) => o.status === 'storniert')).toBe(true);
+    // Alles nicht bereits Versendete ist storniert; bereits versandte E-Mails sind nicht rückholbar (Lastenheft F15)
+    expect(d.outbox.every((o: { status: string }) => o.status === 'storniert' || o.status === 'versendet')).toBe(true);
+    expect(d.outbox.some((o: { status: string }) => o.status === 'storniert')).toBe(true);
     expect(d.events.every((e: { status: string }) => e.status === 'gesperrt')).toBe(true);
     expect((await patient.get('/api/v1/portal/me')).status).toBe(401);
     const resp = d.responses.find((r: { audience: string }) => r.audience === 'arzt');

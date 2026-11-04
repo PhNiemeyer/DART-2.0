@@ -103,6 +103,35 @@ async function demoVersand(c: Client) {
   console.log(`[demo] Versand-Leitstand: ${created} synthetische Versandfälle angelegt (kein Versand)`);
 }
 
+/** Synthetische Betroffenenanträge (R-19): offen, überfällig, Löschung, Einschränkung. Idempotent über die Notiz „Demo-Antrag n“. */
+async function demoBetroffenenrechte(c: Client) {
+  const plan: Array<{ n: number; center: string; kind: string; daysAgo: number; note: string }> = [
+    { n: 1, center: 'Z-101', kind: 'auskunft', daysAgo: 40, note: 'Demo-Antrag 1: Auskunft über alle gespeicherten Daten' },
+    { n: 2, center: 'Z-101', kind: 'loeschung', daysAgo: 12, note: 'Demo-Antrag 2: Löschung nach Ende der Teilnahme' },
+    { n: 3, center: 'Z-101', kind: 'berichtigung', daysAgo: 25, note: 'Demo-Antrag 3: Geburtsdatum falsch erfasst' },
+    { n: 4, center: 'Z-101', kind: 'einschraenkung', daysAgo: 3, note: 'Demo-Antrag 4: Richtigkeit der Angaben bestritten' },
+    { n: 5, center: 'Z-102', kind: 'auskunft', daysAgo: 5, note: 'Demo-Antrag 5: Auskunft' },
+  ];
+  let created = 0;
+  for (const m of plan) {
+    if ((await c.query('SELECT 1 FROM data_subject_request WHERE note = $1', [m.note])).rows[0]) continue;
+    const t = (await c.query(
+      `SELECT tc.id AS case_id, tc.patient_id, tc.center_id FROM treatment_case tc JOIN patient p ON p.id = tc.patient_id JOIN center ce ON ce.id = tc.center_id
+        WHERE p.pseudonym LIKE 'P-DEMO%' AND ce.code = $1 ORDER BY p.pseudonym OFFSET $2 LIMIT 1`,
+      [m.center, 20 + m.n],
+    )).rows[0];
+    if (!t) continue;
+    const r = (await c.query(
+      `INSERT INTO data_subject_request (center_id, patient_id, case_id, kind, received_at, channel, due_date, note)
+       VALUES ($1,$2,$3,$4, CURRENT_DATE - $5::int, 'schriftlich', ((CURRENT_DATE - $5::int) + interval '1 month')::date, $6) RETURNING id`,
+      [t.center_id, t.patient_id, t.case_id, m.kind, m.daysAgo, m.note],
+    )).rows[0];
+    await c.query(`INSERT INTO data_subject_request_event (request_id, center_id, action, detail) VALUES ($1,$2,'erfasst','Synthetische Demodaten')`, [r.id, t.center_id]);
+    created++;
+  }
+  console.log(`[demo] Betroffenenrechte: ${created} synthetische Anträge angelegt`);
+}
+
 async function main() {
   const url = process.env.SEED_DATABASE_URL;
   if (!url) throw new Error('SEED_DATABASE_URL fehlt');
@@ -115,6 +144,7 @@ async function main() {
     if (existing >= target) {
       console.log(`[demo] ${existing} synthetische Demofälle vorhanden – nichts zu tun`);
       await demoVersand(c);
+      await demoBetroffenenrechte(c);
       return;
     }
     const centers = Object.fromEntries((await c.query('SELECT code, id FROM center')).rows.map((r) => [r.code, r.id]));
@@ -252,6 +282,7 @@ async function main() {
     }
     console.log(`[demo] fertig: ${target} synthetische Demofälle (P-DEMO…), ohne Kontaktdaten und ohne Versand`);
     await demoVersand(c);
+    await demoBetroffenenrechte(c);
   } finally {
     await c.end();
   }

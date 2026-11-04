@@ -23,3 +23,5 @@
 | 21-versand-leitstand.png | Versand-Leitstand: Dead Letters, unzustellbare Adressen, Bearbeitung mit Pflichtgrund |
 | 22-editor-gruppe-verzweigung.png | Editor: wiederholbare Gruppe mit Verzweigungsassistent und Live-Vorschau |
 | 23-versionsvergleich.png | Versionsvergleich V1 → V2 mit kritischer Änderung (entfernter Code) |
+| 24-betroffenenrechte.png | Betroffenenrechte: Anträge mit Fristen, überfällige Anträge hervorgehoben |
+| 25-auskunft.png | Auskunftsentwurf nach Identitätsprüfung mit unveränderlichem Verlauf |

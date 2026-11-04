@@ -11,9 +11,9 @@ Alle Daten synthetisch. Fehlschläge werden nicht als bestanden ausgewiesen.
 | Domäne (Follow-up, Einwilligung, Matrix, Rechte, CSV, Migration, Katalog-Mapping V05, Altersgruppe/KI) | `packages/domain: vitest` | **21 / 21 bestanden** |
 | Design-Tokens (WCAG-Kontrast) | `packages/ui: vitest` | **12 / 12 bestanden** |
 | Vault (Upload-Prüfung, Kryptografie) | `apps/vault: vitest` | **4 / 4 bestanden** |
-| API: T02-1 … T02-9, Export, abgelaufener Link, T03 inkl. Variablenkatalog V05, T05 Autoreport, T06 Versand-Leitstand, T07 Formulareditor | `apps/api: vitest` | **44 / 44 bestanden** |
-| Worker: T02-10, Dead Letter, Consent vor Versand, Abmeldung, abgewiesener Empfänger, Versuchsbudget, Export | `apps/worker: vitest` | **7 / 7 bestanden** |
-| Browser-E2E (lokal) | `tests/e2e: playwright` | **13 / 13 bestanden**, 1 übersprungen (OIDC, nur mit Profil) |
+| API: T02-1 … T02-9, Export, abgelaufener Link, T03 inkl. Variablenkatalog V05, T05 Autoreport, T06 Versand-Leitstand, T07 Formulareditor, T08 Betroffenenrechte | `apps/api: vitest` | **50 / 50 bestanden** |
+| Worker: T02-10, Dead Letter, Consent vor Versand, Abmeldung, abgewiesener Empfänger, Versuchsbudget, eingeschränkte Verarbeitung, Export | `apps/worker: vitest` | **8 / 8 bestanden** |
+| Browser-E2E (lokal) | `tests/e2e: playwright` | **14 / 14 bestanden**, 1 übersprungen (OIDC, nur mit Profil) |
 | Quellenprüfung Q02/Q03 | `pnpm katalog` | **17 / 17 Kennzahlen** stimmen mit dem Lastenheft (inkl. unabhängiger Neuberechnung aus V05) |
 | GitHub Actions (CI) | `.github/workflows/ci.yml` | alle Schritte grün (Build, Unit, Migration, API, Worker, E2E) |
 | Browser-E2E OIDC (Keycloak im Compose-Stack, `E2E_OIDC=1`) | `tests/e2e: playwright oidc` | **1 / 1 bestanden** |

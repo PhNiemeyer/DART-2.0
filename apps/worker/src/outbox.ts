@@ -161,6 +161,15 @@ export async function processMessage(deps: WorkerDeps, m: OutboxRow & { prev_sta
     to = surgeon ? `${surgeon.username}@${deps.staffDomain}` : `zentrum-${m.center_id.slice(0, 8)}@${deps.staffDomain}`;
     content = physicianText({ caseNo: pre.physician.caseNo, open: pre.physician.open, webUrl: deps.webUrl });
   } else {
+    // Eingeschränkte Verarbeitung (Art. 18 DSGVO, R-19): kein Versand
+    const rs = (await pool.query('SELECT restricted_at FROM patient WHERE id = $1', [m.patient_id])).rows[0];
+    if (rs?.restricted_at) {
+      await inTx(pool, async (c) => {
+        await finish(c, m, 'storniert', { cancel: 'Verarbeitung eingeschränkt', result: 'storniert' });
+        await audit(c, 'versand_storniert', m.id, m.center_id, 'abgelehnt', 'Verarbeitung eingeschränkt');
+      });
+      return 'storniert';
+    }
     // Abmeldung bzw. unzustellbare Adresse (Versand-Leitstand, R-14): nur E-Mail-Kanal, Einwilligung bleibt unberührt
     const cp = (await pool.query('SELECT email_status FROM contact_preference WHERE patient_id = $1', [m.patient_id])).rows[0];
     if (cp && cp.email_status !== 'aktiv') {

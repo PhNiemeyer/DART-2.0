@@ -22,6 +22,9 @@ Quelle der Wahrheit im Code: `packages/domain/src/catalog.ts` (`ROLE_PERMISSIONS
 | Audit lesen | ✓ | – | – | – | – | – | – | – | – |
 | Versand-Leitstand bearbeiten (eigenes Zentrum) | – | ✓ | – | ✓ | – | – | – | – | – |
 | Versandübersicht aller Zentren (nur Anzahlen) | ✓ | – | – | – | – | – | – | – | – |
+| Betroffenenantrag erfassen (eigenes Zentrum) | – | ✓ | – | ✓ | – | – | – | – | – |
+| Betroffenenantrag bearbeiten/abschließen | – | ✓ | – | – | – | – | – | – | – |
+| Betroffenenrechte: Übersicht aller Zentren (nur Anzahlen) | ✓ | – | – | – | – | – | – | – | – |
 
 Patientinnen und Patienten haben eine eigene, kurzlebige Portalsitzung (Einladungstoken + Zugangscode) und sehen ausschließlich
 eigene Einwilligungen und eigene freigegebene Befragungen (restriktive RLS-Policies).

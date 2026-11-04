@@ -1763,6 +1763,230 @@
           "Versand"
         ]
       }
+    },
+    "/api/v1/dsr/summary": {
+      "get": {
+        "operationId": "DsrController_summary",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Betroffenenrechte"
+        ]
+      }
+    },
+    "/api/v1/dsr": {
+      "get": {
+        "operationId": "DsrController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Betroffenenrechte"
+        ]
+      },
+      "post": {
+        "operationId": "DsrController_create",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Betroffenenrechte"
+        ]
+      }
+    },
+    "/api/v1/dsr/{id}": {
+      "get": {
+        "operationId": "DsrController_detail",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Betroffenenrechte"
+        ]
+      }
+    },
+    "/api/v1/dsr/{id}/identity": {
+      "post": {
+        "operationId": "DsrController_identity",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Betroffenenrechte"
+        ]
+      }
+    },
+    "/api/v1/dsr/{id}/extend": {
+      "post": {
+        "operationId": "DsrController_extend",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Betroffenenrechte"
+        ]
+      }
+    },
+    "/api/v1/dsr/{id}/restrict": {
+      "post": {
+        "operationId": "DsrController_restrict",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Betroffenenrechte"
+        ]
+      }
+    },
+    "/api/v1/dsr/{id}/lift": {
+      "post": {
+        "operationId": "DsrController_lift",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Betroffenenrechte"
+        ]
+      }
+    },
+    "/api/v1/dsr/{id}/auskunft": {
+      "get": {
+        "operationId": "DsrController_report",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Betroffenenrechte"
+        ]
+      }
+    },
+    "/api/v1/dsr/{id}/loeschuebersicht": {
+      "get": {
+        "operationId": "DsrController_deletionOverview",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Betroffenenrechte"
+        ]
+      }
+    },
+    "/api/v1/dsr/{id}/close": {
+      "post": {
+        "operationId": "DsrController_close",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Betroffenenrechte"
+        ]
+      }
     }
   },
   "info": {

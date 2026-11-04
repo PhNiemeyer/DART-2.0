@@ -137,6 +137,16 @@ describe('Versand-Leitstand (R-14) im Worker', () => {
     expect((await owner.query('SELECT status FROM consent_record WHERE patient_id = $1', [cs.patientId])).rows[0].status).toBe('gueltig');
   });
 
+  it('eingeschränkte Verarbeitung (R-19): Worker storniert statt zu senden', async () => {
+    const { cs } = await newCase(today());
+    await isolateOutbox(cs.id);
+    await owner.query(`UPDATE patient SET restricted_at = now(), restricted_reason = 'Test' WHERE id = $1`, [cs.patientId]);
+    const mail = fakeProvider({});
+    await runOnce(deps(mail));
+    expect(mail.delivered).toHaveLength(0);
+    expect((await owner.query(`SELECT status, cancel_reason FROM outbox_message WHERE ${blInvite}`, [cs.id])).rows[0]).toEqual({ status: 'storniert', cancel_reason: 'Verarbeitung eingeschränkt' });
+  });
+
   it('dauerhaft abgewiesene Empfängeradresse: sofort Dead Letter, Kontakt „unzustellbar“, kein weiterer Versuch', async () => {
     const { cs } = await newCase(today());
     await isolateOutbox(cs.id);
