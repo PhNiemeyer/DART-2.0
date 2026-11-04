@@ -183,3 +183,104 @@ describe('IKDC und KOOS (Scoring, Freigabe ausstehend)', () => {
     expect(evaluateForm(schema, { answers: { a: { value: '0' }, b: { value: '4' } }, instances: {} }).scores[0].value).toBe(100);
   });
 });
+
+import { describeRule, diffSchemas, draftFromRule, ruleFieldsFor, ruleFromDraft } from './index';
+describe('Verzweigungsassistent (R-10)', () => {
+  const schema: FormSchema = {
+    schemaVersion: 1, code: 'T-ASSI', title: 'Assistent', audience: 'arzt', module: 'BASIS',
+    sections: [{ id: 's1', title: 'S1', items: [
+      { id: 'seite', varId: 'V_SEITE', label: 'Seite', type: 'single', codes: [{ code: 'li', label: 'links' }, { code: 're', label: 'rechts' }] },
+      { id: 'voroperiert', varId: 'V_VO', label: 'Voroperiert', type: 'yesno' },
+      { id: 'alter', varId: 'V_ALTER', label: 'Alter', type: 'number' },
+      { id: 'eingriffe', varId: 'G_E', label: 'Eingriffe', type: 'group', repeat: { min: 0, max: 5, instanceLabel: 'Eingriff' }, items: [
+        { id: 'e_art', varId: 'G_E_ART', label: 'Art', type: 'single', codes: [{ code: 'a', label: 'A' }, { code: 'b', label: 'B' }] },
+        { id: 'e_detail', varId: 'G_E_DETAIL', label: 'Detail', type: 'text' },
+      ] },
+    ] }],
+  };
+
+  it('Entwurf ↔ Regel ohne Informationsverlust; Ergebnis wertet wie erwartet aus', () => {
+    const d = { mode: 'all' as const, conditions: [{ field: 'voroperiert', op: 'gleich' as const, value: 'ja' }, { field: 'alter', op: 'groesser_gleich' as const, value: 40 }] };
+    const r = ruleFromDraft(d)!;
+    expect(r).toEqual({ all: [{ eq: [{ var: 'voroperiert' }, 'ja'] }, { gte: [{ var: 'alter' }, 40] }] });
+    expect(draftFromRule(r)).toEqual(d);
+    expect(evaluateRule(r, (n) => ({ voroperiert: 'ja', alter: 45 } as Record<string, unknown>)[n])).toBe(true);
+    expect(evaluateRule(r, (n) => ({ voroperiert: 'ja', alter: 30 } as Record<string, unknown>)[n])).toBe(false);
+    // Gruppenregel: Gruppe und ihre Felder nur sichtbar, wenn die Bedingung erfüllt ist
+    const g = structuredClone(schema);
+    g.sections[0].items[3].visibleIf = ruleFromDraft({ mode: 'all', conditions: [{ field: 'voroperiert', op: 'gleich', value: 'ja' }] });
+    const hidden = evaluateForm(g, { answers: { voroperiert: { value: 'nein' } }, instances: { eingriffe: ['i1'] } });
+    expect(hidden.visibleGroups).toEqual([]);
+    expect(hidden.visibleKeys).not.toContain('eingriffe[i1].e_art');
+    const shown = evaluateForm(g, { answers: { voroperiert: { value: 'ja' } }, instances: { eingriffe: ['i1'] } });
+    expect(shown.visibleGroups).toEqual(['eingriffe']);
+    expect(shown.visibleKeys).toContain('eingriffe[i1].e_art');
+    expect(ruleFromDraft({ mode: 'any', conditions: [] })).toBeUndefined();
+    expect(ruleFromDraft({ mode: 'any', conditions: [{ field: 'seite', op: 'nicht_beantwortet' }] })).toEqual({ not: { exists: 'seite' } });
+    expect(draftFromRule({ any: [{ all: [{ exists: 'x' }] }] })).toBeNull();
+  });
+
+  it('Feldauswahl: Gruppenfelder nur innerhalb derselben Gruppe, nie das Feld selbst', () => {
+    expect(ruleFieldsFor(schema, 'alter').map((f) => f.id)).toEqual(['seite', 'voroperiert']);
+    expect(ruleFieldsFor(schema, 'e_detail').map((f) => f.id)).toEqual(['seite', 'voroperiert', 'alter', 'e_art']);
+    expect(ruleFieldsFor(schema, 'voroperiert').find((f) => f.id === 'seite')!.codes.map((c) => c.code)).toEqual(['li', 're']);
+  });
+
+  it('Klartext und ein mit dem Assistenten gebautes Schema besteht die Schemaprüfung', () => {
+    const s = structuredClone(schema);
+    s.sections[0].items[3].items![1].visibleIf = ruleFromDraft({ mode: 'all', conditions: [{ field: 'e_art', op: 'einer_von', value: ['b'] }] });
+    s.sections[0].items[2].visibleIf = ruleFromDraft({ mode: 'any', conditions: [{ field: 'seite', op: 'gleich', value: 'li' }, { field: 'voroperiert', op: 'beantwortet' }] });
+    expect(validateSchema(s)).toEqual([]);
+    expect(describeRule(s.sections[0].items[2].visibleIf, s)).toBe('sichtbar, wenn „Seite“ ist gleich „links“ oder „Voroperiert“ ist beantwortet');
+    expect(describeRule(undefined)).toBe('immer sichtbar');
+  });
+});
+
+describe('Versionsvergleich (R-10)', () => {
+  const base: FormSchema = {
+    schemaVersion: 1, code: 'T-DIFF', title: 'Diff', audience: 'arzt', module: 'BASIS',
+    sections: [{ id: 's1', title: 'Anamnese', items: [
+      { id: 'a', varId: 'V_A', label: 'Frage A', type: 'single', codes: [{ code: '1', label: 'eins' }, { code: '2', label: 'zwei' }] },
+      { id: 'b', varId: 'V_B', label: 'Frage B', type: 'number', min: 0, max: 100 },
+      { id: 'c', varId: 'V_C', label: 'Frage C', type: 'text' },
+      { id: 'd', varId: 'V_D', label: 'Frage D', type: 'yesno' },
+    ] }],
+  };
+
+  it('identische Versionen', () => {
+    const d = diffSchemas(base, structuredClone(base));
+    expect(d.identisch).toBe(true);
+    expect(d.felder).toEqual([]);
+  });
+
+  it('erkennt neue, entfernte, geänderte und verschobene Felder und bewertet kritische Änderungen', () => {
+    const n = structuredClone(base);
+    const items = n.sections[0].items;
+    items[0].codes = [{ code: '1', label: 'eins (neu)' }, { code: '3', label: 'drei' }]; // Code 2 entfernt → kritisch
+    items[1].max = 50; // Bereich enger → kritisch
+    items[1].label = 'Frage B (präzisiert)';
+    n.sections[0].items = [items[0], items[1], items[3]]; // c entfernt
+    n.sections[0].items.push({ id: 'e', varId: 'V_E', label: 'Frage E', type: 'yesno', visibleIf: { eq: [{ var: 'd' }, 'ja'] } });
+    n.sections.push({ id: 's2', title: 'Neu', items: [] });
+    n.sections[0].title = 'Anamnese und Vorgeschichte';
+    const d = diffSchemas(base, n);
+    expect(d.identisch).toBe(false);
+    expect(d.anzahl).toEqual({ neu: 1, entfernt: 1, geaendert: 2, verschoben: 1, kritisch: 3 });
+    const a = d.felder.find((f) => f.itemId === 'a')!;
+    expect(a.schwere).toBe('kritisch');
+    expect(a.aenderungen[0].grund).toBe('entfernt: 2 · neu: 3 · umbenannt: 1');
+    const b = d.felder.find((f) => f.itemId === 'b')!;
+    expect(b.aenderungen.map((x) => [x.feld, x.schwere])).toEqual([['Label', 'hinweis'], ['Wertebereich', 'kritisch']]);
+    expect(d.felder.find((f) => f.itemId === 'd')!.art).toBe('verschoben');
+    expect(d.felder.find((f) => f.itemId === 'c')!.art).toBe('entfernt');
+    expect(d.abschnitte.map((s) => s.art).sort()).toEqual(['neu', 'umbenannt']);
+  });
+
+  it('Datentyp- und Variablenwechsel sind kritisch; neue Verzweigung erscheint im Klartext', () => {
+    const n = structuredClone(base);
+    n.sections[0].items[2] = { ...n.sections[0].items[2], type: 'number', varId: 'V_C2', visibleIf: { exists: 'a' } };
+    const ch = diffSchemas(base, n).felder.find((f) => f.itemId === 'c')!.aenderungen;
+    expect(ch.filter((x) => x.schwere === 'kritisch').map((x) => x.feld)).toEqual(['Datentyp', 'Variablenkennung']);
+    expect(ch.find((x) => x.feld === 'Verzweigung')!.nachher).toBe('sichtbar, wenn „Frage A“ ist beantwortet');
+  });
+});

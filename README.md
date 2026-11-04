@@ -62,6 +62,8 @@ Auf `/anmelden` erscheint im Modus `AUTH_MODE=dev` eine Auswahl. Kein Passwort �
 7. Als `doku.nord` oder `leitung.nord` → **Versand**: Dead Letters, unklare Zustellungen und gesperrte Kontakte bearbeiten
    (Pflichtgrund, protokolliert). `admin` sieht nur Anzahlen je Zentrum. Im Patientenportal lassen sich E-Mail-Erinnerungen
    abbestellen, ohne die Einwilligung zu berühren.
+8. Als `redaktion` → **Formulare** → Version öffnen: wiederholbare Gruppen anlegen, Verzweigungen mit dem Assistenten
+   bauen (Klartext und Live-Vorschau), bei Version > 1 **Mit Vorgängerversion vergleichen** (kritische Änderungen markiert).
 
 ### Daten zurücksetzen
 

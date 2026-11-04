@@ -2,11 +2,12 @@
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { AnswerMap, evaluateForm, FormItem, FormSchema, ITEM_TYPE_LABELS, ITEM_TYPES, ItemType, MISSING_CODES, MissingCode, validateSchema } from '@dart/forms';
+import { AnswerMap, evaluateForm, FormItem, FormSchema, ITEM_TYPE_LABELS, ITEM_TYPES, ItemType, MISSING_CODES, MissingCode, ruleFieldsFor, validateSchema } from '@dart/forms';
 import { api, ApiErr } from '@/lib/api';
 import { fmtDateTime } from '@/lib/format';
 import { can, useMe } from '@/lib/session';
 import { FormRenderer } from '@/components/FormRenderer';
+import { RuleBuilder } from '@/components/RuleBuilder';
 import { Alert, Badge, ConceptNote, ErrorBox, Loading } from '@/components/ui';
 
 const ST: Record<string, string> = { entwurf: 'Entwurf', in_pruefung: 'In Prüfung', freigegeben: 'Freigegeben', veroeffentlicht: 'Veröffentlicht', ruhestand: 'Ruhestand' };
@@ -15,9 +16,7 @@ function codesToText(item: FormItem) {
   return (item.codes ?? []).map((c) => `${c.code}=${c.label}`).join('\n');
 }
 
-function ItemEditor({ item, onChange, onRemove, onMove, readOnly }: { item: FormItem; onChange: (i: FormItem) => void; onRemove: () => void; onMove: (d: -1 | 1) => void; readOnly: boolean }) {
-  const [rule, setRule] = useState(item.visibleIf ? JSON.stringify(item.visibleIf) : '');
-  const [ruleErr, setRuleErr] = useState<string | null>(null);
+function ItemEditor({ item, schema, onChange, onRemove, onMove, readOnly }: { item: FormItem; schema: FormSchema; onChange: (i: FormItem) => void; onRemove: () => void; onMove: (d: -1 | 1) => void; readOnly: boolean }) {
   const [codes, setCodes] = useState(codesToText(item));
   const up = (p: Partial<FormItem>) => onChange({ ...item, ...p });
   const pid = `it-${item.id}`;
@@ -40,15 +39,8 @@ function ItemEditor({ item, onChange, onRemove, onMove, readOnly }: { item: Form
         {(item.type === 'single' || item.type === 'multi') && (
           <div className="field" style={{ gridColumn: '1 / -1' }}><label htmlFor={`${pid}-c`}>Codes (eine Zeile je Code: code=Bezeichnung)</label><textarea id={`${pid}-c`} rows={4} value={codes} onChange={(e) => { setCodes(e.target.value); up({ codes: e.target.value.split('\n').map((l) => l.trim()).filter(Boolean).map((l) => { const i = l.indexOf('='); return i < 0 ? { code: l, label: l } : { code: l.slice(0, i).trim(), label: l.slice(i + 1).trim() }; }) }); }} /></div>
         )}
-        <div className="field" style={{ gridColumn: '1 / -1' }}>
-          <label htmlFor={`${pid}-r`}>Verzweigung „sichtbar wenn“ (Regel-DSL, JSON; leer = immer)</label>
-          <input id={`${pid}-r`} type="text" value={rule} placeholder='{"eq":[{"var":"feld"},"ja"]}' aria-invalid={!!ruleErr} onChange={(e) => {
-            setRule(e.target.value);
-            if (!e.target.value.trim()) { setRuleErr(null); up({ visibleIf: undefined }); return; }
-            try { up({ visibleIf: JSON.parse(e.target.value) }); setRuleErr(null); } catch { setRuleErr('Kein gültiges JSON'); }
-          }} />
-          <div className="help">Erlaubt: all, any, not, eq, in, exists, gt, gte, lt, lte. Kein ausführbarer Code.</div>
-          {ruleErr && <div className="field-error">{ruleErr}</div>}
+        <div style={{ gridColumn: '1 / -1' }}>
+          <RuleBuilder id={`${pid}-r`} rule={item.visibleIf} fields={ruleFieldsFor(schema, item.id)} schema={schema} disabled={readOnly} label="Verzweigung: sichtbar wenn" onChange={(r) => up({ visibleIf: r })} />
         </div>
       </div>
       <div className="row">
@@ -59,6 +51,53 @@ function ItemEditor({ item, onChange, onRemove, onMove, readOnly }: { item: Form
         <button type="button" className="btn-ghost btn-small" onClick={() => onMove(-1)}>Nach oben</button>
         <button type="button" className="btn-ghost btn-small" onClick={() => onMove(1)}>Nach unten</button>
         <button type="button" className="btn-ghost btn-small" onClick={onRemove}>Feld entfernen</button>
+      </div>
+    </fieldset>
+  );
+}
+
+const newId = (prefix: string) => `${prefix}_${Date.now().toString(36).slice(-4)}${Math.floor(Math.random() * 36).toString(36)}`;
+
+/** Wiederholbare Gruppe (R-10): Kopf, Wiederholungsgrenzen, Sichtbarkeit und Felder der Gruppe. Keine verschachtelten Gruppen. */
+function GroupEditor({ group, schema, onChange, onRemove, onMove, readOnly }: { group: FormItem; schema: FormSchema; onChange: (g: FormItem) => void; onRemove: () => void; onMove: (d: -1 | 1) => void; readOnly: boolean }) {
+  const up = (p: Partial<FormItem>) => onChange({ ...group, ...p });
+  const rep = group.repeat ?? { min: 0, max: 1, instanceLabel: 'Eintrag' };
+  const children = group.items ?? [];
+  const setChild = (i: number, c: FormItem | null) => {
+    const items = [...children];
+    if (c) items[i] = c;
+    else items.splice(i, 1);
+    up({ items });
+  };
+  const moveChild = (i: number, d: -1 | 1) => {
+    const j = i + d;
+    if (j < 0 || j >= children.length) return;
+    const items = [...children];
+    [items[i], items[j]] = [items[j], items[i]];
+    up({ items });
+  };
+  const pid = `gr-${group.id}`;
+  return (
+    <fieldset className="group-editor" disabled={readOnly}>
+      <legend>Wiederholbare Gruppe {group.id} · {children.length} Feld(er)</legend>
+      <div className="grid grid-2">
+        <div className="field"><label htmlFor={`${pid}-l`}>Bezeichnung der Gruppe</label><input id={`${pid}-l`} type="text" value={group.label} onChange={(e) => up({ label: e.target.value })} /></div>
+        <div className="field"><label htmlFor={`${pid}-il`}>Bezeichnung eines Eintrags</label><input id={`${pid}-il`} type="text" value={rep.instanceLabel} onChange={(e) => up({ repeat: { ...rep, instanceLabel: e.target.value } })} /></div>
+        <div className="field"><label htmlFor={`${pid}-min`}>Mindestanzahl Einträge</label><input id={`${pid}-min`} type="number" min={0} max={50} value={rep.min} onChange={(e) => up({ repeat: { ...rep, min: Number(e.target.value) } })} /></div>
+        <div className="field"><label htmlFor={`${pid}-max`}>Höchstanzahl Einträge</label><input id={`${pid}-max`} type="number" min={1} max={50} value={rep.max} onChange={(e) => up({ repeat: { ...rep, max: Number(e.target.value) } })} /></div>
+        <div className="field" style={{ gridColumn: '1 / -1' }}><label htmlFor={`${pid}-h`}>Hilfetext</label><input id={`${pid}-h`} type="text" value={group.help ?? ''} onChange={(e) => up({ help: e.target.value || undefined })} /></div>
+        <div style={{ gridColumn: '1 / -1' }}>
+          <RuleBuilder id={`${pid}-r`} rule={group.visibleIf} fields={ruleFieldsFor(schema, group.id)} schema={schema} disabled={readOnly} label="Gruppe sichtbar wenn" onChange={(r) => up({ visibleIf: r })} />
+        </div>
+      </div>
+      <div className="stack" style={{ gap: 12, marginTop: 12 }}>
+        {children.map((c, i) => <ItemEditor key={c.id} item={c} schema={schema} readOnly={readOnly} onChange={(n) => setChild(i, n)} onRemove={() => setChild(i, null)} onMove={(d) => moveChild(i, d)} />)}
+      </div>
+      <div className="row" style={{ marginTop: 8 }}>
+        {!readOnly && <button type="button" className="btn-secondary btn-small" onClick={() => { const id = newId('g'); up({ items: [...children, { id, varId: `${group.varId}_${id.toUpperCase()}`, label: 'Neues Gruppenfeld (Beispiel)', type: 'text' }] }); }}>Feld in Gruppe hinzufügen</button>}
+        <button type="button" className="btn-ghost btn-small" onClick={() => onMove(-1)}>Gruppe nach oben</button>
+        <button type="button" className="btn-ghost btn-small" onClick={() => onMove(1)}>Gruppe nach unten</button>
+        <button type="button" className="btn-ghost btn-small" onClick={onRemove}>Gruppe entfernen</button>
       </div>
     </fieldset>
   );
@@ -149,6 +188,7 @@ export default function Editor() {
         )}
         {v.status === 'veroeffentlicht' && can(me, 'form.publish') && <button className="btn-ghost" onClick={() => act(`/form-versions/${vid}/retire`, 'In den Ruhestand versetzt.')}>Ruhestand</button>}
         <button className="btn-ghost" onClick={exportJson}>JSON exportieren</button>
+        {v.version > 1 && <Link className="btn btn-ghost" href={`/formulare/${vid}/vergleich`}>Mit Vorgängerversion vergleichen</Link>}
         {!editable && <span className="small muted">{v.status === 'entwurf' ? 'Nur die Formularredaktion kann Entwürfe bearbeiten.' : 'Diese Version ist nicht mehr bearbeitbar.'}</span>}
       </div>
       <div className="editor-grid">
@@ -157,12 +197,15 @@ export default function Editor() {
           {schema.sections.map((s, si) => (
             <section key={s.id} className="card">
               <div className="field"><label htmlFor={`sec-${s.id}`}>Abschnittstitel</label><input id={`sec-${s.id}`} type="text" value={s.title} disabled={!editable} onChange={(e) => { const x = structuredClone(schema); x.sections[si].title = e.target.value; setSchema(x); setDirty(true); }} /></div>
-              {s.items.map((it, ii) => it.type === 'group' ? (
-                <fieldset key={it.id}><legend>Wiederholbare Gruppe {it.id} ({it.items?.length} Felder)</legend><p className="small muted">Gruppenfelder werden in dieser Prototyp-Oberfläche als JSON gepflegt (Export/Import).</p></fieldset>
-              ) : (
-                <ItemEditor key={it.id} item={it} readOnly={!editable} onChange={(n) => updateItem(si, ii, n)} onRemove={() => { const x = structuredClone(schema); x.sections[si].items.splice(ii, 1); setSchema(x); setDirty(true); }} onMove={(d) => { const x = structuredClone(schema); const arr = x.sections[si].items; const j = ii + d; if (j < 0 || j >= arr.length) return; [arr[ii], arr[j]] = [arr[j], arr[ii]]; setSchema(x); setDirty(true); }} />
-              ))}
+              {s.items.map((it, ii) => {
+                const remove = () => { const x = structuredClone(schema); x.sections[si].items.splice(ii, 1); setSchema(x); setDirty(true); setEditorKey((k) => k + 1); };
+                const move = (d: -1 | 1) => { const x = structuredClone(schema); const arr = x.sections[si].items; const j = ii + d; if (j < 0 || j >= arr.length) return; [arr[ii], arr[j]] = [arr[j], arr[ii]]; setSchema(x); setDirty(true); setEditorKey((k) => k + 1); };
+                return it.type === 'group'
+                  ? <GroupEditor key={it.id} group={it} schema={schema} readOnly={!editable} onChange={(n) => updateItem(si, ii, n)} onRemove={remove} onMove={move} />
+                  : <ItemEditor key={it.id} item={it} schema={schema} readOnly={!editable} onChange={(n) => updateItem(si, ii, n)} onRemove={remove} onMove={move} />;
+              })}
               {editable && <button type="button" className="btn-secondary btn-small" onClick={() => { const x = structuredClone(schema); const n = x.sections[si].items.length + 1; const id = `neu_${si + 1}_${n}_${Date.now().toString(36).slice(-3)}`; x.sections[si].items.push({ id, varId: `${schema.code.replace(/-/g, '_')}_${id.toUpperCase()}`, label: 'Neue Frage (Beispiel)', type: 'yesno' }); setSchema(x); setDirty(true); setEditorKey((k) => k + 1); }}>Feld hinzufügen</button>}
+              {editable && <button type="button" className="btn-secondary btn-small" style={{ marginLeft: 8 }} onClick={() => { const x = structuredClone(schema); const id = newId('gruppe'); x.sections[si].items.push({ id, varId: `${schema.code.replace(/-/g, '_')}_${id.toUpperCase()}`, label: 'Neue wiederholbare Gruppe (Beispiel)', type: 'group', repeat: { min: 0, max: 3, instanceLabel: 'Eintrag' }, items: [{ id: newId('g'), varId: `${schema.code.replace(/-/g, '_')}_${id.toUpperCase()}_F1`, label: 'Erstes Gruppenfeld (Beispiel)', type: 'text' }] }); setSchema(x); setDirty(true); setEditorKey((k) => k + 1); }}>Wiederholbare Gruppe hinzufügen</button>}
             </section>
           ))}
           {editable && <button type="button" className="btn-ghost" onClick={() => { const x = structuredClone(schema); x.sections.push({ id: `abschnitt_${x.sections.length + 1}`, title: 'Neuer Abschnitt', items: [] }); setSchema(x); setDirty(true); }}>Abschnitt hinzufügen</button>}

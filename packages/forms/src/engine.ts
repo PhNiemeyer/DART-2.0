@@ -240,6 +240,8 @@ export interface ScoreOutcome {
 export interface FormEvaluation {
   /** Antwortschlüssel sichtbarer Eingabefelder (inkl. Gruppeninstanzen). */
   visibleKeys: string[];
+  /** Sichtbare wiederholbare Gruppen (Gruppenregel und Abschnitt erfüllt). */
+  visibleGroups: string[];
   /** Vorhandene Antworten, die aktuell ausgeblendet sind (bleiben erhalten, inaktiv). */
   inactiveKeys: string[];
   visibleSections: string[];
@@ -344,6 +346,7 @@ export function evaluateForm(schema: FormSchema, data: ResponseData): FormEvalua
   }
 
   const visibleKeys: string[] = [];
+  const visibleGroups: string[] = [];
   const issues: Issue[] = [];
   const scores: ScoreOutcome[] = [];
   const visibleSections: string[] = [];
@@ -420,6 +423,7 @@ export function evaluateForm(schema: FormSchema, data: ResponseData): FormEvalua
       if (item.type === 'group') {
         const inst = instances[item.id] ?? [];
         if (isVisible(item.id)) {
+          visibleGroups.push(item.id);
           if (item.repeat && inst.length < item.repeat.min) {
             issues.push({ key: item.id, itemId: item.id, message: `Mindestens ${item.repeat.min} Eintrag/Einträge „${item.repeat.instanceLabel}“ erforderlich.`, severity: 'fehler', kind: 'gruppe' });
             requiredOpen++;
@@ -438,7 +442,7 @@ export function evaluateForm(schema: FormSchema, data: ResponseData): FormEvalua
   const visibleSet = new Set(visibleKeys);
   const inactiveKeys = Object.keys(answers).filter((k) => isAnswered(answers[k]) && (!visibleSet.has(k) || !validKeys.has(k)));
 
-  return { visibleKeys, inactiveKeys, visibleSections, scores, issues, progress: { answered, total, requiredOpen } };
+  return { visibleKeys, visibleGroups, inactiveKeys, visibleSections, scores, issues, progress: { answered, total, requiredOpen } };
 }
 
 /** Blockierende Fehler für den bewussten Abschluss. */

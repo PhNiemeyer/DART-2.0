@@ -15,7 +15,7 @@ Alle Umsetzungen sind Prototyp-Stand mit synthetischen Daten; keine Fachfreigabe
 | F05 | Suchbare OPS-Mehrfachauswahl mit Version | `meta/ops`, `domain/catalog.ts` (OPS_EXAMPLES) | T02-3, E2E 2 | umgesetzt | Beispielkatalog, amtliche OPS-Version offen (E-13) |
 | F06 | Autosave, sichtbare Zustände, Konflikt, Abschluss, Wiederöffnung | `responses.ts`, Web `useResponseEditor.tsx` | T02-9, E2E 4 | umgesetzt | – |
 | F07 | Basic/Science historisiert, Register/Module, Zuordnungsmatrix | `capture_mode_history`, `domain/catalog.ts` (ASSIGNMENT_MATRIX_V1), `cases.ts` (mode) | T02-3, Unit „Zuordnungsmatrix“ | teilweise | Matrix-Pflege nur als versionierte Codedatei, nicht im Editor (R-11); Matrix fachlich offen (E-01/E-02) |
-| F08 | Formulareditor, Vier-Augen, Versionen, JSON-Export/-Import | `forms.ts`, Web `/formulare`, `/formulare/[vid]` | T02-7, E2E 5 | teilweise | Gruppen nur per JSON pflegbar (R-10) |
+| F08 | Formulareditor, Vier-Augen, Versionen, JSON-Export/-Import | `forms.ts`, Web `/formulare`, `/formulare/[vid]`, `/formulare/[vid]/vergleich`, `forms/builder.ts`, `forms/diff.ts` | T02-7, T07 (Gruppe, Assistent, Vergleich), Unit forms (Assistent, Vergleich), E2E 5 und Editor | umgesetzt | Pflichtvermerk bei kritischen Änderungen (R-28) |
 | F09 | Regel-DSL ohne eval, Client=Server, Zyklen, inaktive Antworten | `packages/forms` (rules.ts, engine.ts) | Unit forms (18), T02-7 (Zyklus), T02-8 | umgesetzt | – |
 | F10 | Versionierte Scores, Demonstrationsscore | `forms/scores.ts`, `derived_score` | Unit (7 Testwerte), T02-8 (75) | teilweise | Übernahme historischer Originalscores in `derived_score` (Art `original_historisch`) fehlt (R-13); Lizenzen offen (E-09) |
 | F11 | eConsent-Zustände, aktive Zustimmung, getrennte Zeitfelder | `domain/consent.ts`, `consent.ts`, `portal.ts` | Unit, T02-4, T02-5, E2E 3 | umgesetzt | Informationstext ist Demonstration |
@@ -60,7 +60,7 @@ Alle Umsetzungen sind Prototyp-Stand mit synthetischen Daten; keine Fachfreigabe
 
 | ID | Umsetzung | Status |
 |---|---|---|
-| T01 REST v1, OpenAPI, Fehlercodes, If-Match, Idempotency-Key | `docs/api/openapi.json` (84 Pfade), `errors.ts`, `http.ts` | umgesetzt |
+| T01 REST v1, OpenAPI, Fehlercodes, If-Match, Idempotency-Key | `docs/api/openapi.json` (85 Pfade), `errors.ts`, `http.ts` | umgesetzt |
 | T02 Abnahmefälle 1–10 | `apps/api/test/t02-abnahme.test.ts`, `apps/worker/test/t02-10-versand.test.ts` | alle 10 bestanden |
 | T03 Migrationstests | `apps/api/test/t03-migration.test.ts`, Unit Migration, `tools/variablenkatalog.py` | bestanden; V05-Hash stimmt, alle 1.441 Katalogzeilen und 33 Neuanlage-Vorschläge mit expliziter Klasse und Entscheidung, 0 Freigaben (keine erfunden) |
 | T04 Zusatzprüfungen | Upload/MIME/Malware, abgelaufener Link, Linkscanner, E-Mail-Fehler (Dead Letter), Datumskorrektur, Monatsende/Sommerzeit, Schemazyklus, unzulässiger Export, CSV-Formelinjektion, Tastatur, 360 px, Persistenz nach Neustart, Restore | bestanden; Screenreader-Test offen |

@@ -195,6 +195,73 @@ test.describe.serial('DART 2.0 – vertikale Strecke', () => {
     await page.screenshot({ path: SHOT('13-editor-vorschau'), fullPage: false });
   });
 
+  test('Formulareditor: wiederholbare Gruppe, Verzweigungsassistent und Versionsvergleich', async ({ page }) => {
+    await page.setViewportSize({ width: 1400, height: 1000 });
+    const H = { 'x-dart-csrf': '1' };
+    const as = (u: string) => page.request.post('/api/v1/auth/dev-login', { headers: H, data: { username: u } });
+    const call = async (method: 'post' | 'put' | 'get', path: string, data?: unknown) => {
+      const r = await page.request[method](`/api/v1${path}`, { headers: H, data });
+      expect(r.ok(), `${method} ${path}: ${await r.text()}`).toBe(true);
+      return r.json();
+    };
+    await as('redaktion');
+    const code = `E2E-ED-${uniq}`.toUpperCase().slice(0, 40);
+    const q = await call('post', '/questionnaires', { code, title: 'Vorgeschichte Knie (Beispiel)', audience: 'arzt', module: 'BASIS' });
+    const v1 = {
+      schemaVersion: 1, code, title: 'Vorgeschichte Knie (Beispiel)', audience: 'arzt', module: 'BASIS',
+      sections: [{ id: 'abschnitt_1', title: 'Vorgeschichte', items: [
+        { id: 'voroperiert', varId: `${code}_VO`, label: 'Voroperationen am Knie', type: 'yesno' },
+        { id: 'eingriffe', varId: `${code}_G`, label: 'Frühere Eingriffe', type: 'group', repeat: { min: 0, max: 3, instanceLabel: 'Eingriff' }, items: [
+          { id: 'e_art', varId: `${code}_G_ART`, label: 'Art des Eingriffs', type: 'single', codes: [{ code: 'as', label: 'Arthroskopie' }, { code: 'of', label: 'Offene Operation' }, { code: 'so', label: 'Sonstige' }] },
+          { id: 'e_jahr', varId: `${code}_G_JAHR`, label: 'Jahr', type: 'number', min: 1950, max: 2026 },
+        ] },
+      ] }],
+    };
+    await call('put', `/form-versions/${q.versionId}`, { schema: v1 });
+    await call('post', `/form-versions/${q.versionId}/submit-review`, {});
+    await as('freigabe');
+    await call('post', `/form-versions/${q.versionId}/approve`, {});
+    await call('post', `/form-versions/${q.versionId}/publish`, {});
+    await as('redaktion');
+    const v2 = await call('post', `/questionnaires/${q.questionnaireId}/versions`, {});
+    const s2 = JSON.parse(JSON.stringify(v1));
+    s2.sections[0].items[1].items[0].codes = s2.sections[0].items[1].items[0].codes.filter((c: { code: string }) => c.code !== 'of');
+    s2.sections[0].items[1].items[1].label = 'Jahr des Eingriffs';
+    s2.sections[0].items.push({ id: 'beschwerden', varId: `${code}_BESCHW`, label: 'Aktuelle Beschwerden', type: 'yesno' });
+    await call('put', `/form-versions/${v2.versionId}`, { schema: s2 });
+
+    // Verzweigungsassistent im Browser: Gruppe nur sichtbar bei Voroperation = Ja
+    await page.goto(`/formulare/${v2.versionId}`);
+    await expect(page.getByText(/Wiederholbare Gruppe eingriffe/)).toBeVisible();
+    const grp = page.locator('fieldset.group-editor');
+    await grp.getByRole('button', { name: 'Bedingung hinzufügen' }).first().click();
+    await grp.getByLabel('Feld', { exact: true }).first().selectOption('voroperiert');
+    await grp.getByLabel('Wert', { exact: true }).first().selectOption('ja');
+    await expect(grp.getByText('sichtbar, wenn „Voroperationen am Knie“ ist gleich „Ja“')).toBeVisible();
+    await page.getByRole('button', { name: 'Entwurf speichern' }).click();
+    await expect(page.getByText('Entwurf gespeichert.')).toBeVisible();
+    // Vorschau: Gruppe erscheint erst nach „Ja“
+    const preview = page.locator('.editor-grid > div').nth(1);
+    await expect(preview.getByText('Frühere Eingriffe')).toHaveCount(0);
+    await preview.getByRole('radio', { name: 'Ja' }).first().check();
+    await expect(preview.getByText('Frühere Eingriffe').first()).toBeVisible();
+    expect(await unlabeledInputs(page)).toEqual([]);
+    await grp.locator('legend').first().evaluate((el) => el.scrollIntoView({ block: 'start' }));
+    await page.screenshot({ path: SHOT('22-editor-gruppe-verzweigung'), fullPage: false });
+
+    // Versionsvergleich V1 → V2
+    await page.getByRole('link', { name: 'Mit Vorgängerversion vergleichen' }).click();
+    await expect(page.getByRole('heading', { name: 'Versionsvergleich' })).toBeVisible();
+    await expect(page.getByText('kritische Änderungen', { exact: true })).toBeVisible();
+    await expect(page.getByText(/entfernt: of/)).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Aktuelle Beschwerden' })).toBeVisible();
+    await page.screenshot({ path: SHOT('23-versionsvergleich'), fullPage: true });
+    await page.getByLabel('Nur kritische Änderungen anzeigen').check();
+    await expect(page.getByRole('heading', { name: 'Aktuelle Beschwerden' })).toHaveCount(0);
+    await page.setViewportSize({ width: 360, height: 800 });
+    await noHorizontalScroll(page);
+  });
+
   test('Papierweg: Upload in Prüfung und Prüfansicht', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 1000 });
     await login(page, 'doku.nord');

@@ -168,6 +168,7 @@ export function FormRenderer({ schema, data, evaluation, readOnly, showRequired 
           <h2 id={`sec-${s.id}`}>{s.title}</h2>
           {s.items.map((item) => {
             if (item.type === 'group') {
+              if (!evaluation.visibleGroups.includes(item.id)) return null;
               const ids = data.instances[item.id] ?? [];
               const groupIssues = issuesFor(evaluation, item.id, showRequired);
               return (

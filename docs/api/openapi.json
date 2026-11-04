@@ -1027,6 +1027,29 @@
         ]
       }
     },
+    "/api/v1/form-versions/{id}/diff": {
+      "get": {
+        "operationId": "FormsController_diff",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Formulare"
+        ]
+      }
+    },
     "/api/v1/form-versions/{id}/export": {
       "get": {
         "operationId": "FormsController_export",

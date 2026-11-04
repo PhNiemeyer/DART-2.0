@@ -21,3 +21,5 @@
 | 19-variablenkatalog.png | Variablenkatalog V05 (Originalquellen), gefiltert nach Prüfhinweis |
 | 20-autoreport.png | Autoreport: IKDC nach Pathologie, eigene Fälle vs. Gesamtkollektiv, Verlauf, Patientencharakteristika |
 | 21-versand-leitstand.png | Versand-Leitstand: Dead Letters, unzustellbare Adressen, Bearbeitung mit Pflichtgrund |
+| 22-editor-gruppe-verzweigung.png | Editor: wiederholbare Gruppe mit Verzweigungsassistent und Live-Vorschau |
+| 23-versionsvergleich.png | Versionsvergleich V1 → V2 mit kritischer Änderung (entfernter Code) |
