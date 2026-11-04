@@ -29,6 +29,7 @@ interface OutboxRow {
   stage: string;
   payload: Record<string, unknown>;
   attempts: number;
+  max_attempts?: number;
   status: string;
   provider_message_id: string | null;
 }
@@ -160,6 +161,16 @@ export async function processMessage(deps: WorkerDeps, m: OutboxRow & { prev_sta
     to = surgeon ? `${surgeon.username}@${deps.staffDomain}` : `zentrum-${m.center_id.slice(0, 8)}@${deps.staffDomain}`;
     content = physicianText({ caseNo: pre.physician.caseNo, open: pre.physician.open, webUrl: deps.webUrl });
   } else {
+    // Abmeldung bzw. unzustellbare Adresse (Versand-Leitstand, R-14): nur E-Mail-Kanal, Einwilligung bleibt unberührt
+    const cp = (await pool.query('SELECT email_status FROM contact_preference WHERE patient_id = $1', [m.patient_id])).rows[0];
+    if (cp && cp.email_status !== 'aktiv') {
+      const reason = cp.email_status === 'abgemeldet' ? 'E-Mail-Erinnerungen abbestellt' : 'E-Mail-Adresse unzustellbar';
+      await inTx(pool, async (c) => {
+        await finish(c, m, 'storniert', { cancel: reason, result: 'storniert' });
+        await audit(c, 'versand_storniert', m.id, m.center_id, 'abgelehnt', reason);
+      });
+      return 'storniert';
+    }
     to = await deps.contact(pre.vaultRef!, m.center_id);
     if (!to) {
       await inTx(pool, async (c) => {
@@ -191,7 +202,20 @@ export async function processMessage(deps: WorkerDeps, m: OutboxRow & { prev_sta
     return 'versendet';
   } catch (e) {
     const kind = e instanceof SendError ? e.kind : 'unklar';
-    const dead = m.attempts >= MAX_ATTEMPTS;
+    if (kind === 'empfaenger' && !pre.physician) {
+      // Dauerhaft abgewiesene Adresse: sofort Dead Letter, Kontakt als unzustellbar markieren (Bearbeitung im Leitstand)
+      await inTx(pool, async (c) => {
+        await finish(c, m, 'dead_letter', { error: `Empfänger abgewiesen (${(e as Error).message.slice(0, 50)})`, result: 'unzustellbar' });
+        await c.query(
+          `INSERT INTO contact_preference (patient_id, center_id, email_status, source, reason) VALUES ($1,$2,'unzustellbar','versand','Empfängeradresse vom Mailserver abgewiesen')
+           ON CONFLICT (patient_id) DO UPDATE SET email_status = 'unzustellbar', source = 'versand', reason = EXCLUDED.reason, updated_by = NULL, updated_at = now()`,
+          [m.patient_id, m.center_id],
+        );
+        await audit(c, 'versand_unzustellbar', m.id, m.center_id, 'fehler', 'Empfängeradresse abgewiesen');
+      });
+      return 'unzustellbar';
+    }
+    const dead = m.attempts >= (m.max_attempts ?? MAX_ATTEMPTS);
     await inTx(pool, async (c) => {
       await finish(c, m, dead ? 'dead_letter' : kind === 'unklar' ? 'unklar' : 'fehlgeschlagen', {
         error: (e as Error).message.slice(0, 200),

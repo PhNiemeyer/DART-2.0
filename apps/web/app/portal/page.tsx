@@ -153,6 +153,22 @@ export default function Portal() {
           </div>
         ))}
       </section>
+      {valid.length > 0 && (
+        <section className="card" aria-labelledby="h-mail">
+          <h2 id="h-mail">E-Mail-Erinnerungen</h2>
+          {me.emailReminders === 'unzustellbar' ? (
+            <Alert kind="warning" title="E-Mails konnten nicht zugestellt werden">Bitte wenden Sie sich an Ihr Zentrum, damit Ihre E-Mail-Adresse geprüft wird.</Alert>
+          ) : (
+            <>
+              <p>{me.emailReminders === 'aktiv' ? 'Sie erhalten Einladungen und Erinnerungen zu Ihren Befragungen per E-Mail.' : 'Sie haben E-Mail-Erinnerungen abbestellt. Ihr Zentrum kann Sie weiterhin vor Ort einladen.'}</p>
+              <button className="btn-secondary" onClick={() => api('/portal/email-reminders', { body: { active: me.emailReminders !== 'aktiv' } }).then((r) => { setMsg(r.emailReminders === 'aktiv' ? 'E-Mail-Erinnerungen sind wieder aktiv.' : 'E-Mail-Erinnerungen abbestellt. Ihre Einwilligung und Ihre Befragungen bleiben bestehen.'); return load(); }).catch(setError)}>
+                {me.emailReminders === 'aktiv' ? 'E-Mail-Erinnerungen abbestellen' : 'E-Mail-Erinnerungen wieder erhalten'}
+              </button>
+            </>
+          )}
+          <p className="small muted">Das betrifft nur E-Mails. Ihre Einwilligung widerrufen Sie oben unter „Nachweis und Status“.</p>
+        </section>
+      )}
       <button className="btn-ghost" onClick={() => api('/portal/logout', { body: {} }).finally(() => { window.location.href = '/portal/einladung'; })}>Abmelden</button>
     </>
   );

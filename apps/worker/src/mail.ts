@@ -12,8 +12,12 @@ export interface OutgoingMail {
 }
 
 export class SendError extends Error {
-  /** 'abgelehnt' = sicher nicht zugestellt; 'unklar' = Ergebnis unbekannt (Abgleich nötig) */
-  constructor(public readonly kind: 'abgelehnt' | 'unklar', message: string) {
+  /**
+   * 'abgelehnt' = sicher nicht zugestellt (vorübergehend, erneuter Versuch sinnvoll);
+   * 'empfaenger' = Empfängeradresse dauerhaft abgewiesen (SMTP 550/551/553) → Adresse unzustellbar, kein Wiederholen;
+   * 'unklar' = Ergebnis unbekannt (Abgleich nötig)
+   */
+  constructor(public readonly kind: 'abgelehnt' | 'empfaenger' | 'unklar', message: string) {
     super(message);
   }
 }
@@ -42,6 +46,7 @@ export function smtpProvider(opts: { host: string; port: number; from: string; m
       } catch (e) {
         const code = (e as { code?: string; responseCode?: number }).code;
         const rc = (e as { responseCode?: number }).responseCode;
+        if (rc === 550 || rc === 551 || rc === 553) throw new SendError('empfaenger', `${rc}`);
         // Verbindungsfehler vor der Übergabe: sicher nicht gesendet. Zeitüberschreitung danach: unklar.
         if (code === 'ECONNREFUSED' || code === 'ESOCKET' || code === 'EDNS' || (rc && rc >= 500)) throw new SendError('abgelehnt', `${code ?? rc}`);
         throw new SendError('unklar', `${code ?? 'unbekannt'}`);
@@ -79,6 +84,8 @@ export function inviteText(p: { link: string; reminder: boolean; resend: boolean
     'Der Link ist nur für Sie bestimmt, einmalig verwendbar und zeitlich begrenzt.',
     '',
     'Sie können Ihre Einwilligung jederzeit im Patientenportal oder bei Ihrem Zentrum widerrufen.',
+    'Keine E-Mail-Erinnerungen mehr gewünscht? Sie können sie im Patientenportal unter „E-Mail-Erinnerungen“ abbestellen',
+    'oder Ihrem Zentrum Bescheid geben. Ihre Einwilligung und Ihre Befragungen bleiben davon unberührt.',
     '',
     '— Diese Nachricht wurde automatisch erstellt (DART 2.0 Prototyp, nur synthetische Daten).',
   ].join('\n');

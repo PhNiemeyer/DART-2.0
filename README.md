@@ -59,6 +59,9 @@ Auf `/anmelden` erscheint im Modus `AUTH_MODE=dev` eine Auswahl. Kein Passwort �
 6. Als `dr.nord` → **Auswertung & Export** → **Autoreport**: eigene Fälle gegenüber Zentrum und Gesamtkollektiv
    (IKDC/KOOS nach Pathologie, Eingriff, Modus; Verlauf; Patientencharakteristika). Die 300 synthetischen Demofälle lädt der
    Migrationsschritt automatisch (`DEMO_DATEN=false` schaltet das ab; in Produktion verweigert).
+7. Als `doku.nord` oder `leitung.nord` → **Versand**: Dead Letters, unklare Zustellungen und gesperrte Kontakte bearbeiten
+   (Pflichtgrund, protokolliert). `admin` sieht nur Anzahlen je Zentrum. Im Patientenportal lassen sich E-Mail-Erinnerungen
+   abbestellen, ohne die Einwilligung zu berühren.
 
 ### Daten zurücksetzen
 
