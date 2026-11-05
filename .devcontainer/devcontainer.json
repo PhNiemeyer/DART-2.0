@@ -1,0 +1,20 @@
+{
+  // DART 2.0 – Demo in GitHub Codespaces. AUSSCHLIESSLICH synthetische Daten, keine echten Patientendaten eingeben.
+  "name": "DART 2.0 – Demo (synthetische Daten)",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu-24.04",
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+  },
+  // Der komplette Stack (Datenbanken, Vault, API, Worker, Web) läuft in Docker; Maschine mit 4 Kernen für einen zügigen ersten Build
+  "hostRequirements": { "cpus": 4, "memory": "8gb", "storage": "32gb" },
+  "forwardPorts": [3000, 8025],
+  "portsAttributes": {
+    "3000": { "label": "DART 2.0 (Webanwendung)", "onAutoForward": "openBrowser" },
+    "8025": { "label": "Mailpit (Test-Postfach)", "onAutoForward": "silent" }
+  },
+  "otherPortsAttributes": { "onAutoForward": "ignore" },
+  "postStartCommand": "bash .devcontainer/start-demo.sh",
+  "customizations": {
+    "codespaces": { "openFiles": [".devcontainer/DEMO.md"] }
+  }
+}

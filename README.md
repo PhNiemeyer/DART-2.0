@@ -7,6 +7,15 @@
 Gemeinsamer Kern für **DART Basic, DART Science, KnorpelRegister DGOU und DEKOR**; Knie zuerst, Schulter/Hüfte/Sprunggelenk
 architektonisch vorbereitet. Grundlage: *Lastenheft DART 2.0, Fassung 1.0* und *Coding-Masterprompt* (beide in `docs/quellen/`).
 
+## Demo im Browser (ohne Installation)
+
+[![In GitHub Codespaces öffnen](https://github.com/codespaces/badge.svg)](https://codespaces.new/PhNiemeyer/DART-2.0?quickstart=1)
+
+Ein Klick startet bei GitHub eine eigene, vollständige DART-2.0-Demo mit 300 synthetischen Fällen (GitHub-Konto erforderlich).
+Der erste Start baut die Anwendung und dauert einige Minuten; danach öffnet sich die Webanwendung, Anmeldung über die
+Demo-Nutzerauswahl. Hinweise und Demo-Nutzer: [`.devcontainer/DEMO.md`](.devcontainer/DEMO.md). Kosten trägt das
+GitHub-Konto der startenden Person (persönliche Konten enthalten ein monatliches Freikontingent). **Nur synthetische Daten eingeben.**
+
 ## Schnellstart
 
 Voraussetzungen: Docker (mit Compose v2), ca. 4 GB freier Arbeitsspeicher. Für die Entwicklung ohne Docker zusätzlich Node.js ≥ 22 und pnpm 10.

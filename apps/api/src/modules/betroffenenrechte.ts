@@ -5,6 +5,7 @@ import { Request } from 'express';
 import { z } from 'zod';
 import { Audit } from '../core/audit';
 import { Actor, can, centersWith, CurrentActor, Perm } from '../core/auth';
+import { todayBerlin } from '../core/config';
 import { Db, Tx } from '../core/db';
 import { conflict, forbidden, invalid, notFound, requestIdOf } from '../core/errors';
 import { parse } from '../core/http';
@@ -48,10 +49,11 @@ export class DsrController {
       return this.db.tx({ centerIds: centersWith(actor, 'dsr.record') }, async (c) => {
         const r = (await c.query(
           `SELECT count(*) FILTER (WHERE status IN ('offen','in_bearbeitung'))::int AS offen,
-                  count(*) FILTER (WHERE status IN ('offen','in_bearbeitung') AND COALESCE(extended_due_date, due_date) < CURRENT_DATE)::int AS ueberfaellig,
-                  count(*) FILTER (WHERE status IN ('offen','in_bearbeitung') AND COALESCE(extended_due_date, due_date) BETWEEN CURRENT_DATE AND CURRENT_DATE + 7)::int AS bald_faellig,
+                  count(*) FILTER (WHERE status IN ('offen','in_bearbeitung') AND COALESCE(extended_due_date, due_date) < $1::date)::int AS ueberfaellig,
+                  count(*) FILTER (WHERE status IN ('offen','in_bearbeitung') AND COALESCE(extended_due_date, due_date) BETWEEN $1::date AND $1::date + 7)::int AS bald_faellig,
                   count(*) FILTER (WHERE status IN ('erledigt','abgelehnt'))::int AS abgeschlossen
              FROM data_subject_request`,
+          [todayBerlin()],
         )).rows[0];
         return { ebene: 'zentrum', ...r };
       });
@@ -69,18 +71,18 @@ export class DsrController {
     return this.db.tx({ centerIds: centersWith(actor, 'dsr.record') }, async (c) => {
       const items = (await c.query(
         `SELECT d.id, d.kind, d.status, d.received_at, d.channel, d.due_date, d.extended_due_date, COALESCE(d.extended_due_date, d.due_date) AS frist,
-                (COALESCE(d.extended_due_date, d.due_date) - CURRENT_DATE) AS tage_bis_frist, d.identity_method IS NOT NULL AS identitaet_geprueft,
+                (COALESCE(d.extended_due_date, d.due_date) - $3::date) AS tage_bis_frist, d.identity_method IS NOT NULL AS identitaet_geprueft,
                 d.case_id, tc.case_no, p.pseudonym, (p.restricted_at IS NOT NULL) AS eingeschraenkt, ce.code AS center_code, d.closed_at
            FROM data_subject_request d JOIN patient p ON p.id = d.patient_id JOIN center ce ON ce.id = d.center_id
            LEFT JOIN treatment_case tc ON tc.id = d.case_id
           WHERE ($1 = 'alle'
              OR ($1 = 'offen' AND d.status IN ('offen','in_bearbeitung'))
-             OR ($1 = 'ueberfaellig' AND d.status IN ('offen','in_bearbeitung') AND COALESCE(d.extended_due_date, d.due_date) < CURRENT_DATE)
+             OR ($1 = 'ueberfaellig' AND d.status IN ('offen','in_bearbeitung') AND COALESCE(d.extended_due_date, d.due_date) < $3::date)
              OR ($1 = 'abgeschlossen' AND d.status IN ('erledigt','abgelehnt')))
             AND ($2::uuid IS NULL OR d.case_id = $2)
           ORDER BY (d.status IN ('offen','in_bearbeitung')) DESC, COALESCE(d.extended_due_date, d.due_date), d.created_at
           LIMIT 200`,
-        [q.status, q.caseId ?? null],
+        [q.status, q.caseId ?? null, todayBerlin()],
       )).rows;
       return { items };
     });
@@ -103,7 +105,8 @@ export class DsrController {
     return this.db.tx({ centerIds: centersWith(actor, 'dsr.record') }, async (c) => {
       const tc = (await c.query('SELECT id, patient_id, center_id FROM treatment_case WHERE id = $1', [b.caseId])).rows[0];
       if (!tc) throw notFound();
-      if (b.receivedAt > new Date().toISOString().slice(0, 10)) throw invalid('Das Eingangsdatum liegt in der Zukunft.');
+      // Kalendertag in Deutschland (nicht UTC): sonst gilt „heute“ zwischen Mitternacht und 1/2 Uhr als Zukunft
+      if (b.receivedAt > todayBerlin()) throw invalid('Das Eingangsdatum liegt in der Zukunft.');
       const r = (await c.query(
         `INSERT INTO data_subject_request (center_id, patient_id, case_id, kind, received_at, channel, due_date, note, created_by)
          VALUES ($1,$2,$3,$4,$5,$6, ($5::date + interval '1 month')::date, $7, $8) RETURNING id, center_id, due_date`,
@@ -173,7 +176,7 @@ export class DsrController {
       const r = await this.load(c, id, true);
       if (!OPEN.includes(r.status)) throw conflict('ZUSTAND_UNZULAESSIG', 'Der Antrag ist bereits abgeschlossen.');
       if (r.extended_due_date) throw conflict('ZUSTAND_UNZULAESSIG', 'Die Frist wurde bereits verlängert.');
-      if ((await c.query('SELECT $1::date < CURRENT_DATE AS late', [r.due_date])).rows[0].late) throw conflict('ZUSTAND_UNZULAESSIG', 'Die Frist ist bereits abgelaufen; eine Verlängerung ist nur innerhalb der Frist möglich.');
+      if ((await c.query('SELECT $1::date < $2::date AS late', [r.due_date, todayBerlin()])).rows[0].late) throw conflict('ZUSTAND_UNZULAESSIG', 'Die Frist ist bereits abgelaufen; eine Verlängerung ist nur innerhalb der Frist möglich.');
       const u = (await c.query(`UPDATE data_subject_request SET extended_due_date = (due_date + interval '2 months')::date, extension_reason = $2 WHERE id = $1 RETURNING extended_due_date`, [id, reason])).rows[0];
       await this.event(c, r, actor, 'frist_verlaengert', reason);
       await this.audit.write(c, actor, { action: 'betroffenenantrag_verlaengern', objectType: 'betroffenenantrag', objectId: id, centerId: r.center_id, reason, requestId: requestIdOf(req) });
