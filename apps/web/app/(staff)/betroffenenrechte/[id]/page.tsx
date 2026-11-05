@@ -5,7 +5,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { api, ApiErr } from '@/lib/api';
 import { DSR_CHANNEL, DSR_EVENT, DSR_IDENTITY, DSR_KIND, DSR_STATUS } from '@/lib/dsr';
 import { CONSENT_SCOPE_LABELS, CONSENT_STATUS_LABELS } from '@dart/domain';
-import { fmtDate, fmtDateTime, OUTBOX_STATUS_LABEL, RESPONSE_STATUS_LABEL } from '@/lib/format';
+import { fmtDate, fmtDateTime, OUTBOX_STATUS_LABEL, RESPONSE_STATUS_LABEL, todayIso } from '@/lib/format';
 
 const KIND_LABEL: Record<string, string> = { einladung: 'Einladung', erinnerung: 'Erinnerung', arzt_erinnerung: 'Erinnerung an das Zentrum', vor_ort_link: 'Link vor Ort' };
 const MAIL_LABEL: Record<string, string> = { aktiv: 'aktiv', abgemeldet: 'abbestellt', unzustellbar: 'Adresse unzustellbar' };
@@ -84,7 +84,7 @@ export default function DsrDetail() {
 
   if (!d) return error ? <ErrorBox error={error} /> : <Loading what="Antrag" />;
   const open = ['offen', 'in_bearbeitung'].includes(d.status);
-  const overdue = open && d.frist < new Date().toISOString().slice(0, 10);
+  const overdue = open && d.frist < todayIso();
   return (
     <>
       <p className="small no-print"><Link href="/betroffenenrechte">← Alle Anträge</Link></p>
